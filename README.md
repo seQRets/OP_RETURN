@@ -14,6 +14,7 @@ One HTML file. No dependencies, no build step, no analytics, no network requests
 - **Byte meter** — a running count against the 80-byte standard relay limit, with a warning when you cross it (non-ASCII characters cost several bytes each, so the count is not the character count)
 - **Two guided paths** — Trezor Suite (five clicks, no command line) or Bitcoin Core (four commands)
 - **Pre-filled commands** — your hex is substituted directly into the `bitcoin-cli` / Core console commands, formatted for whichever one you're using, with a copy button on each
+- **Light and dark themes** — follows your system by default, with a toggle that overrides it and remembers the choice
 - **Plain-English explanations** of why anyone would use OP_RETURN and what its limits are
 
 ## Why write to a blockchain?

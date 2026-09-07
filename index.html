@@ -6,6 +6,7 @@
 <title>OP_RETURN Message Builder</title>
 <meta name="description" content="Write a message to the Bitcoin blockchain. Encode text to hex and follow step-by-step instructions for Trezor Suite or Bitcoin Core. Runs entirely in your browser.">
 <meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem("opreturn-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <meta property="og:title" content="OP_RETURN Message Builder">
 <meta property="og:description" content="Write a message to the Bitcoin blockchain. Runs entirely in your browser, nothing is sent anywhere.">
 <meta property="og:type" content="website">
@@ -39,8 +40,10 @@
     --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
     --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
+  /* Dark palette. Applied when the OS asks for dark and the reader has not
+     forced light, or when the toggle explicitly selects dark. */
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
       --bg: #101310;
       --bg-grad: radial-gradient(1200px 600px at 50% -10%, #1c211c 0%, #141813 55%, #0e110e 100%);
       --ink: #e8ebe4;
@@ -62,6 +65,27 @@
       --shadow-lift: 0 1px 2px rgba(0,0,0,.5), 0 14px 34px -12px rgba(0,0,0,.7);
     }
   }
+  :root[data-theme="dark"] {
+    --bg: #101310;
+    --bg-grad: radial-gradient(1200px 600px at 50% -10%, #1c211c 0%, #141813 55%, #0e110e 100%);
+    --ink: #e8ebe4;
+    --ink-soft: #a0a89b;
+    --ink-faint: #737b6f;
+    --panel: #191d18;
+    --panel-sunk: #141812;
+    --line: #2d332b;
+    --line-soft: #242a22;
+    --term-bg: #0b0d09;
+    --term-line: #262b21;
+    --accent: #f0a04b;
+    --accent-ink: #f0a04b;
+    --accent-wash: #2a1f10;
+    --danger: #e2705a;
+    --danger-wash: #2b1613;
+    --ok: #86c06f;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px -8px rgba(0,0,0,.5);
+    --shadow-lift: 0 1px 2px rgba(0,0,0,.5), 0 14px 34px -12px rgba(0,0,0,.7);
+  }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { font-size: 16px; -webkit-text-size-adjust: 100%; }
@@ -77,6 +101,43 @@
   }
   .wrap { max-width: 760px; margin: 0 auto; }
   ::selection { background: var(--accent); color: #14170f; }
+
+  /* ---------- theme toggle ---------- */
+  .theme-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 20;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--panel);
+    color: var(--ink-soft);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: color .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  .theme-toggle:hover { color: var(--accent-ink); border-color: var(--accent); transform: translateY(-1px); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .theme-toggle svg {
+    width: 17px; height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .theme-toggle .ic-sun { display: none; }
+  .theme-toggle .ic-moon { display: block; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .theme-toggle .ic-sun { display: block; }
+    :root:not([data-theme="light"]) .theme-toggle .ic-moon { display: none; }
+  }
+  :root[data-theme="dark"] .theme-toggle .ic-sun { display: block; }
+  :root[data-theme="dark"] .theme-toggle .ic-moon { display: none; }
 
   /* ---------- masthead ---------- */
   header.masthead {
@@ -105,14 +166,14 @@
     background: var(--accent);
   }
   h1 {
-    font-family: var(--mono);
-    font-size: clamp(1.75rem, 5.5vw, 2.6rem);
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-    margin-bottom: 0.85rem;
+    font-family: var(--sans);
+    font-size: clamp(2.1rem, 6.8vw, 3.3rem);
+    font-weight: 200;
+    letter-spacing: -0.025em;
+    line-height: 1.06;
+    margin-bottom: 0.95rem;
   }
-  h1 .op { color: var(--accent); }
+  h1 .op { color: var(--accent); font-weight: 300; }
   .lede {
     color: var(--ink-soft);
     font-size: 1.06rem;
@@ -586,7 +647,7 @@
 
   @media (max-width: 560px) {
     body { padding: 0 1rem; }
-    header.masthead { padding: 2.75rem 0 2rem; }
+    header.masthead { padding: 4rem 0 2rem; }
     .console-body { padding: 1.1rem 1.1rem 1.25rem; }
     .term { font-size: 0.76rem; padding-right: 1rem; padding-top: 2.4rem; }
     .msg-echo { padding-right: 1rem; padding-top: 2.4rem; }
@@ -602,6 +663,11 @@
 </head>
 <body>
 <div class="wrap">
+
+  <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" aria-label="Switch to dark theme" title="Switch theme">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.1M12 19.3v2.1M2.6 12h2.1M19.3 12h2.1M5.4 5.4l1.5 1.5M17.1 17.1l1.5 1.5M18.6 5.4l-1.5 1.5M6.9 17.1l-1.5 1.5"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 14.5A8.6 8.6 0 1 1 9.5 3.4a6.9 6.9 0 0 0 11.1 11.1z"/></svg>
+  </button>
 
   <header class="masthead">
     <span class="badge">Runs entirely in your browser</span>
@@ -908,6 +974,36 @@
 
   modeConsole.addEventListener('click', function () { selectMode('console'); });
   modeTerminal.addEventListener('click', function () { selectMode('terminal'); });
+
+  var root = document.documentElement;
+  var THEME_KEY = 'opreturn-theme';
+  var toggle = document.getElementById('themeToggle');
+  var darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+  function isDark() {
+    var forced = root.getAttribute('data-theme');
+    return forced ? forced === 'dark' : darkQuery.matches;
+  }
+
+  function syncToggle() {
+    var dark = isDark();
+    toggle.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    toggle.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+  }
+
+  toggle.addEventListener('click', function () {
+    var next = isDark() ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    syncToggle();
+  });
+
+  // With no explicit choice stored, keep following the system.
+  darkQuery.addEventListener('change', function () {
+    if (!root.getAttribute('data-theme')) syncToggle();
+  });
+
+  syncToggle();
 
   document.querySelectorAll('.copy').forEach(function (btn) {
     btn.addEventListener('click', function () {
