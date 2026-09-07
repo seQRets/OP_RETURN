@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OP_RETURN Message Builder</title>
+<style>
+  :root {
+    --bg: #f2f3f1;
+    --ink: #1c2024;
+    --ink-soft: #5a6068;
+    --panel: #ffffff;
+    --line: #d8dad6;
+    --term-bg: #171a16;
+    --term-text: #d7dbce;
+    --term-dim: #7c8276;
+    --term-hex: #9ecf6a;
+    --accent: #e2841b;
+    --danger: #c2482e;
+    --radius: 6px;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    --sans: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.55;
+    padding: 2.5rem 1.25rem 5rem;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+
+  header { margin-bottom: 2.25rem; }
+  h1 {
+    font-family: var(--mono);
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.5rem;
+  }
+  .lede {
+    color: var(--ink-soft);
+    max-width: 58ch;
+  }
+
+  .field-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+  textarea {
+    width: 100%;
+    min-height: 96px;
+    resize: vertical;
+    font-family: var(--sans);
+    font-size: 1.05rem;
+    padding: 0.85rem 1rem;
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+    color: var(--ink);
+  }
+  textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+
+  .meter {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0.6rem 0 0;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+  }
+  .meter .count { font-weight: 600; }
+  .meter .count.over { color: var(--danger); }
+  .meter-note { color: var(--ink-soft); font-family: var(--sans); }
+
+  .bar {
+    height: 4px;
+    background: var(--line);
+    border-radius: 2px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.15s ease;
+  }
+  .bar-fill.over { background: var(--danger); }
+
+  section.hexout { margin-top: 1.75rem; }
+  .hexbox {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    background: var(--panel);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+    word-break: break-all;
+    min-height: 3.2rem;
+    color: var(--ink);
+  }
+  .hexbox .empty { color: var(--ink-soft); font-family: var(--sans); font-size: 0.95rem; }
+
+  .pathpick { margin-top: 2.5rem; }
+  .pathpick > h2 {
+    font-family: var(--mono);
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+  .pathpick > p.intro {
+    color: var(--ink-soft);
+    margin-bottom: 1.1rem;
+    max-width: 62ch;
+    font-size: 0.95rem;
+  }
+  .path-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .path-card {
+    text-align: left;
+    font-family: var(--sans);
+    background: var(--panel);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.9rem 1rem;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .path-card:hover { border-color: var(--ink-soft); }
+  .path-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .path-card[aria-pressed="true"] {
+    border-color: var(--accent);
+    outline: 1.5px solid var(--accent);
+  }
+  .path-card .pc-title {
+    display: block;
+    font-weight: 600;
+    font-size: 0.98rem;
+    margin-bottom: 0.2rem;
+  }
+  .path-card .pc-sub {
+    display: block;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+  }
+
+  .track { margin-top: 1.9rem; }
+  .track[hidden] { display: none; }
+
+  .step { margin-bottom: 1.6rem; }
+  .step-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.45rem;
+  }
+  .step-num {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .step-title { font-weight: 600; }
+  .step-desc {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    margin: 0 0 0.55rem;
+    max-width: 62ch;
+  }
+  .track-note {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    margin-bottom: 1.4rem;
+    max-width: 62ch;
+  }
+  .mode-toggle {
+    display: inline-flex;
+    gap: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+  .mode-btn {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    padding: 0.35rem 0.8rem;
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    background: var(--panel);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .mode-btn:hover { border-color: var(--ink-soft); color: var(--ink); }
+  .mode-btn:focus-visible { outline: 2px solid var(--accent); }
+  .mode-btn[aria-pressed="true"] {
+    border-color: var(--accent);
+    outline: 1px solid var(--accent);
+    color: var(--ink);
+  }
+  .term {
+    position: relative;
+    background: var(--term-bg);
+    border-radius: var(--radius);
+    padding: 0.9rem 1rem;
+    font-family: var(--mono);
+    font-size: 0.84rem;
+    line-height: 1.6;
+    color: var(--term-text);
+    word-break: break-all;
+    white-space: pre-wrap;
+  }
+  .term .hx { color: var(--term-hex); }
+  .term .ph { color: var(--term-dim); font-style: italic; }
+  .copy {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid #3a4036;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--term-dim);
+    cursor: pointer;
+  }
+  .copy:hover { color: var(--term-text); border-color: var(--term-dim); }
+  .copy:focus-visible { outline: 2px solid var(--accent); }
+  .copy.done { color: var(--term-hex); border-color: var(--term-hex); }
+
+  .msg-echo {
+    background: var(--panel);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+    font-size: 0.98rem;
+    position: relative;
+  }
+  .msg-echo .empty { color: var(--ink-soft); }
+  .msg-echo .copy {
+    border-color: var(--line);
+    color: var(--ink-soft);
+  }
+  .msg-echo .copy:hover { color: var(--ink); border-color: var(--ink-soft); }
+  .msg-echo .copy.done { color: var(--accent); border-color: var(--accent); }
+
+  .notes {
+    margin-top: 2.75rem;
+    border-top: 1.5px solid var(--line);
+    padding-top: 1.5rem;
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+  }
+  .notes p { margin-bottom: 0.7rem; max-width: 64ch; }
+  .notes strong { color: var(--ink); }
+
+  @media (max-width: 520px) {
+    body { padding: 1.5rem 1rem 4rem; }
+    h1 { font-size: 1.3rem; }
+    .term { font-size: 0.78rem; }
+    .path-cards { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bar-fill { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>OP_RETURN Message Builder</h1>
+    <p class="lede">Type a message and follow the steps to write it to the Bitcoin blockchain. Everything on this page runs in your browser. Nothing is sent anywhere.</p>
+  </header>
+
+  <label class="field-label" for="msg">Your message</label>
+  <textarea id="msg" placeholder="Type the message you want to write to the blockchain" spellcheck="false" autocomplete="off"></textarea>
+
+  <div class="meter">
+    <span class="count" id="byteCount">0 bytes</span>
+    <span class="meter-note" id="byteNote">Up to 80 bytes relays everywhere.</span>
+  </div>
+  <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+
+  <section class="hexout">
+    <label class="field-label">Hex encoding</label>
+    <div class="hexbox" id="hexOut"><span class="empty">Your message in hex appears as you type. OP_RETURN data travels as hex, which is just your text written in base 16.</span></div>
+  </section>
+
+  <section class="pathpick">
+    <h2>Pick your path</h2>
+    <p class="intro">Both are self-custody. You hold the keys and sign the transaction either way. The full node path adds privacy and verification: your own node builds and broadcasts the transaction instead of a company server doing it for you.</p>
+    <div class="path-cards">
+      <button class="path-card" id="pickTrezor" aria-pressed="true">
+        <span class="pc-title">Hardware wallet path</span>
+        <span class="pc-sub">Trezor Suite. About five clicks, no command line.</span>
+      </button>
+      <button class="path-card" id="pickCore" aria-pressed="false">
+        <span class="pc-title">Full node path</span>
+        <span class="pc-sub">Bitcoin Core. Four commands on your own node.</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="track" id="trackTrezor">
+    <p class="track-note">The message rides along on a normal payment. Simplest version: send a small amount to a fresh receive address in your own account, so the coins come right back to you and you only pay the miner fee.</p>
+
+    <div class="step">
+      <div class="step-head"><span class="step-num">1</span><span class="step-title">Open the Send form</span></div>
+      <p class="step-desc">In Trezor Suite, open your Bitcoin account and start a send like any normal transaction.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="step-num">2</span><span class="step-title">Reveal the message option</span></div>
+      <p class="step-desc">Click the small three-dot button in the top-right corner of the Send screen, above the Total panel, and choose Attach message. It is easy to miss. Not the Add label pencil next to the address field. That one is a private note stored on your computer only and never touches the blockchain.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="step-num">3</span><span class="step-title">Paste your message</span></div>
+      <p class="step-desc">Use the left box, the plain text one. Emoji work fine, Suite converts them for you. The hex box on the right fills automatically, and it will match the hex encoding shown above. Copy your message from below.</p>
+      <div class="msg-echo" id="msgEcho"><button class="copy" data-plain="msgEcho">copy</button><span class="cmd-text"><span class="empty">Your message appears as you type.</span></span></div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="step-num">4</span><span class="step-title">Fill in the payment and confirm</span></div>
+      <p class="step-desc">Enter the recipient address and amount, review the transaction, and confirm on the device screen. The amount can be tiny. Around 1,000 sats to your own fresh receive address works well, and the network minimum is a few hundred sats. Your only real cost is the miner fee, since the coins come back to you.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="step-num">5</span><span class="step-title">See it on-chain</span></div>
+      <p class="step-desc">Search the transaction ID on mempool.space. The explorer decodes the OP_RETURN output back to readable text on the transaction page.</p>
+    </div>
+  </section>
+
+  <section class="track" id="trackCore" hidden>
+    <p class="track-note">This path needs a wallet inside Bitcoin Core itself, created with createwallet and holding some bitcoin. That wallet is separate from any hardware wallet. If your node just verifies blocks and your coins live on a Trezor or other signing device, send a small amount to a Core wallet address first, since Core needs coins it controls to fund and sign the transaction. Your message is already substituted into the commands below.</p>
+    <p class="track-note">No terminal needed. The Bitcoin Core app has a built-in console: Window menu, then Node window, then the Console tab. Pick below where you'll run the commands and they reformat to match, so what you copy is exactly what you run. The console shows a red warning about scammers who trick people into pasting commands. That warning is right, and the rule it implies is the one to follow: never run commands you don't understand. Each step below says what its command does, so read before you run.</p>
+
+    <div class="mode-toggle" role="group" aria-label="Where you'll run the commands">
+      <button class="mode-btn" id="modeConsole" aria-pressed="true">Core app console</button>
+      <button class="mode-btn" id="modeTerminal" aria-pressed="false">Terminal</button>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="step-num">1</span><span class="step-title">Create the funded transaction</span></div>
+      <p class="step-desc">Core picks an unspent output from your wallet to fund the transaction, adds the OP_RETURN output with your message, and sends change back to you. It returns a PSBT, a partially signed bitcoin transaction. That is a draft transaction waiting for a signature.</p>
+      <div class="term" id="cmd1"><button class="copy" data-target="cmd1">copy</button><span class="cmd-text"></span></div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="step-num">2</span><span class="step-title">Sign it</span></div>
+      <p class="step-desc">Paste the psbt value from step 1 between the quotes. Your wallet signs the transaction.</p>
+      <div class="term" id="cmd2"><button class="copy" data-target="cmd2">copy</button><span class="cmd-text"></span></div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="step-num">3</span><span class="step-title">Finalize it</span></div>
+      <p class="step-desc">Paste the psbt value from step 2. Core converts the signed PSBT into raw transaction hex ready for broadcast.</p>
+      <div class="term" id="cmd3"><button class="copy" data-target="cmd3">copy</button><span class="cmd-text"></span></div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="step-num">4</span><span class="step-title">Broadcast it</span></div>
+      <p class="step-desc">Paste the hex value from step 3. This sends the transaction to the network and returns your transaction ID.</p>
+      <div class="term" id="cmd4"><button class="copy" data-target="cmd4">copy</button><span class="cmd-text"></span></div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="step-num">5</span><span class="step-title">See it on-chain</span></div>
+      <p class="step-desc">Search the transaction ID on mempool.space, or in your own explorer if you run one. The OP_RETURN output decodes back to readable text on the transaction page.</p>
+    </div>
+  </section>
+
+  <section class="notes">
+    <p><strong>Cost.</strong> You pay a normal transaction fee and nothing else. The OP_RETURN output carries zero bitcoin, and the rest of your funds return to your wallet.</p>
+    <p><strong>Permanence.</strong> Once confirmed, the message is on every full node forever. It cannot be edited or deleted. Do not write anything private.</p>
+    <p><strong>Size.</strong> Messages up to 80 bytes follow the long-standing standard relay policy and propagate everywhere. Bitcoin Core 30 relaxed the default to allow larger payloads, but older nodes may not relay them. Trezor Suite enforces the 80-byte limit.</p>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  var msg = document.getElementById('msg');
+  var hexOut = document.getElementById('hexOut');
+  var byteCount = document.getElementById('byteCount');
+  var byteNote = document.getElementById('byteNote');
+  var barFill = document.getElementById('barFill');
+  var currentHex = '';
+  var mode = 'console';
+  var msgEcho = document.querySelector('#msgEcho .cmd-text');
+  var LIMIT = 80;
+  var enc = new TextEncoder();
+
+  function toHex(bytes) {
+    var out = '';
+    for (var i = 0; i < bytes.length; i++) {
+      out += bytes[i].toString(16).padStart(2, '0');
+    }
+    return out;
+  }
+
+  function update() {
+    var text = msg.value;
+    var bytes = enc.encode(text);
+    var hex = toHex(bytes);
+    var n = bytes.length;
+
+    byteCount.textContent = n + (n === 1 ? ' byte' : ' bytes');
+    byteCount.classList.toggle('over', n > LIMIT);
+
+    var pct = Math.min(100, (n / LIMIT) * 100);
+    barFill.style.width = pct + '%';
+    barFill.classList.toggle('over', n > LIMIT);
+
+    if (n === 0) {
+      byteNote.textContent = 'Up to 80 bytes relays everywhere.';
+    } else if (n <= LIMIT) {
+      byteNote.textContent = (LIMIT - n) + ' of 80 standard bytes remaining.';
+    } else {
+      byteNote.textContent = 'Over 80 bytes. Needs Core 30+ relay policy, and Trezor Suite will reject it.';
+    }
+
+    if (hex) {
+      hexOut.textContent = hex;
+    } else {
+      hexOut.innerHTML = '<span class="empty">Your message in hex appears as you type. OP_RETURN data travels as hex, which is just your text written in base 16.</span>';
+    }
+
+    currentHex = hex;
+    renderCommands();
+
+    if (text) {
+      msgEcho.textContent = text;
+    } else {
+      msgEcho.innerHTML = '<span class="empty">Your message appears as you type.</span>';
+    }
+  }
+
+  msg.addEventListener('input', update);
+  update();
+
+  var pickTrezor = document.getElementById('pickTrezor');
+  var pickCore = document.getElementById('pickCore');
+  var trackTrezor = document.getElementById('trackTrezor');
+  var trackCore = document.getElementById('trackCore');
+
+  function selectPath(which) {
+    var trezor = which === 'trezor';
+    pickTrezor.setAttribute('aria-pressed', trezor ? 'true' : 'false');
+    pickCore.setAttribute('aria-pressed', trezor ? 'false' : 'true');
+    trackTrezor.hidden = !trezor;
+    trackCore.hidden = trezor;
+  }
+
+  pickTrezor.addEventListener('click', function () { selectPath('trezor'); });
+  pickCore.addEventListener('click', function () { selectPath('core'); });
+
+  function renderCommands() {
+    var hexHtml = '<span class="hx">' + (currentHex || 'your-hex-appears-here') + '</span>';
+    var pfx = mode === 'terminal' ? 'bitcoin-cli ' : '';
+    var json = mode === 'terminal'
+      ? "'[]' '[{\"data\":\"" + hexHtml + "\"}]'"
+      : '[] [{"data":"' + hexHtml + '"}]';
+    function ph(t) { return '"<span class="ph">' + t + '</span>"'; }
+    document.querySelector('#cmd1 .cmd-text').innerHTML = pfx + 'walletcreatefundedpsbt ' + json;
+    document.querySelector('#cmd2 .cmd-text').innerHTML = pfx + 'walletprocesspsbt ' + ph('paste psbt from step 1');
+    document.querySelector('#cmd3 .cmd-text').innerHTML = pfx + 'finalizepsbt ' + ph('paste psbt from step 2');
+    document.querySelector('#cmd4 .cmd-text').innerHTML = pfx + 'sendrawtransaction ' + ph('paste hex from step 3');
+  }
+
+  var modeConsole = document.getElementById('modeConsole');
+  var modeTerminal = document.getElementById('modeTerminal');
+
+  function selectMode(m) {
+    mode = m;
+    modeConsole.setAttribute('aria-pressed', m === 'console' ? 'true' : 'false');
+    modeTerminal.setAttribute('aria-pressed', m === 'terminal' ? 'true' : 'false');
+    renderCommands();
+  }
+
+  modeConsole.addEventListener('click', function () { selectMode('console'); });
+  modeTerminal.addEventListener('click', function () { selectMode('terminal'); });
+
+  document.querySelectorAll('.copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id = btn.dataset.target || btn.dataset.plain;
+      var container = document.getElementById(id);
+      var text = container.querySelector('.cmd-text').textContent;
+      navigator.clipboard.writeText(text).then(function () {
+        btn.textContent = 'copied';
+        btn.classList.add('done');
+        setTimeout(function () {
+          btn.textContent = 'copy';
+          btn.classList.remove('done');
+        }, 1400);
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
