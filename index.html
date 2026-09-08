@@ -43,31 +43,7 @@
        both ship a genuine heavy weight; Roboto covers Android. */
     --display: "Avenir Next", "Segoe UI", Roboto, "Helvetica Neue", -apple-system, sans-serif;
   }
-  /* Dark palette. Applied when the OS asks for dark and the reader has not
-     forced light, or when the toggle explicitly selects dark. */
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #15120d;
-      --bg-grad: radial-gradient(1200px 600px at 50% -10%, #221e16 0%, #18150f 55%, #12100b 100%);
-      --ink: #ece6da;
-      --ink-soft: #a8a091;
-      --ink-faint: #7b7466;
-      --panel: #1f1b14;
-      --panel-sunk: #191610;
-      --line: #362f24;
-      --line-soft: #2a251c;
-      --term-bg: #100e09;
-      --term-line: #2e2820;
-      --accent: #f0a04b;
-      --accent-ink: #f0a04b;
-      --accent-wash: #2e2110;
-      --danger: #e2705a;
-      --danger-wash: #2e1813;
-      --ok: #86c06f;
-      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px -8px rgba(0,0,0,.5);
-      --shadow-lift: 0 1px 2px rgba(0,0,0,.5), 0 14px 34px -12px rgba(0,0,0,.7);
-    }
-  }
+  /* Dark palette. Light is the default; dark is opt-in via the toggle. */
   :root[data-theme="dark"] {
     --bg: #15120d;
     --bg-grad: radial-gradient(1200px 600px at 50% -10%, #221e16 0%, #18150f 55%, #12100b 100%);
@@ -89,6 +65,9 @@
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px -8px rgba(0,0,0,.5);
     --shadow-lift: 0 1px 2px rgba(0,0,0,.5), 0 14px 34px -12px rgba(0,0,0,.7);
   }
+
+  :root { color-scheme: light; }
+  :root[data-theme="dark"] { color-scheme: dark; }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { font-size: 16px; -webkit-text-size-adjust: 100%; }
@@ -135,10 +114,6 @@
   }
   .theme-toggle .ic-sun { display: none; }
   .theme-toggle .ic-moon { display: block; }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .theme-toggle .ic-sun { display: block; }
-    :root:not([data-theme="light"]) .theme-toggle .ic-moon { display: none; }
-  }
   :root[data-theme="dark"] .theme-toggle .ic-sun { display: block; }
   :root[data-theme="dark"] .theme-toggle .ic-moon { display: none; }
 
@@ -926,11 +901,8 @@
   var root = document.documentElement;
   var THEME_KEY = 'opreturn-theme';
   var toggle = document.getElementById('themeToggle');
-  var darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
   function isDark() {
-    var forced = root.getAttribute('data-theme');
-    return forced ? forced === 'dark' : darkQuery.matches;
+    return root.getAttribute('data-theme') === 'dark';
   }
 
   function syncToggle() {
@@ -944,11 +916,6 @@
     root.setAttribute('data-theme', next);
     try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
     syncToggle();
-  });
-
-  // With no explicit choice stored, keep following the system.
-  darkQuery.addEventListener('change', function () {
-    if (!root.getAttribute('data-theme')) syncToggle();
   });
 
   syncToggle();
