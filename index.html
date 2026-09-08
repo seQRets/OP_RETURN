@@ -634,7 +634,7 @@
 
       <div class="meter">
         <span class="count" id="byteCount">0 bytes</span>
-        <span class="meter-note" id="byteNote">Up to 80 bytes relays everywhere.</span>
+        <span class="meter-note" id="byteNote">Up to 80 bytes works everywhere.</span>
       </div>
       <div class="bar"><div class="bar-fill" id="barFill"></div></div>
 
@@ -682,7 +682,7 @@
     <div class="limits">
       <div class="limit">
         <span class="lm-tag">Size</span>
-        <p><strong>80 bytes is the safe ceiling.</strong> That is roughly one sentence, and non-ASCII characters eat several bytes each &mdash; an emoji can cost four. Bitcoin Core 30 relaxed its default relay policy to allow larger payloads, but nodes running older versions or custom limits may refuse to pass them on, so anything over 80 bytes is best-effort. Trezor Suite enforces 80 bytes strictly.</p>
+        <p><strong>80 bytes is the safe limit.</strong> That is about one sentence. Watch out for accented letters and emoji, which use several bytes each &mdash; a single emoji can cost four. You can go longer, but only by sending with Bitcoin Core v30 or newer, and even then some of the computers that make up the Bitcoin network may quietly refuse to pass your message along. Trezor Suite will not send more than 80 bytes at all.</p>
       </div>
       <div class="limit warn">
         <span class="lm-tag">Permanent</span>
@@ -702,7 +702,7 @@
       </div>
       <div class="limit">
         <span class="lm-tag">Policy</span>
-        <p><strong>One per transaction, and it costs a fee.</strong> Standard relay policy accepts a single OP_RETURN output per transaction; want two messages, send two transactions. You pay the ordinary miner fee for the bytes either way, and confirmation takes as long as any other transaction.</p>
+        <p><strong>One message per transaction, and it costs a fee.</strong> A transaction can carry only one message. To send two, send two transactions. Either way you pay the normal Bitcoin fee for the extra bytes, and it takes just as long to confirm as any other transaction.</p>
       </div>
     </div>
   </section>
@@ -855,11 +855,11 @@
     barFill.classList.toggle('over', n > LIMIT);
 
     if (n === 0) {
-      byteNote.textContent = 'Up to 80 bytes relays everywhere.';
+      byteNote.textContent = 'Up to 80 bytes works everywhere.';
     } else if (n <= LIMIT) {
-      byteNote.textContent = (LIMIT - n) + ' of 80 standard bytes remaining.';
+      byteNote.textContent = (LIMIT - n) + ' of 80 bytes left.';
     } else {
-      byteNote.textContent = 'Over 80 bytes. Needs Core 30+ relay policy, and Trezor Suite will reject it.';
+      byteNote.textContent = 'Too long for Trezor Suite. Sending this needs Bitcoin Core v30 or newer.';
     }
 
     if (hex) {
