@@ -678,7 +678,7 @@
       </div>
       <div class="limit">
         <span class="lm-tag">Value</span>
-        <p><strong>The output is provably unspendable.</strong> An OP_RETURN output carries zero bitcoin and is discarded from the UTXO set by design. Send coins to it and they are destroyed. Your funds ride along in the other outputs of the same transaction.</p>
+        <p><strong>Nothing can ever be spent from it.</strong> The part of the transaction that carries your message holds no bitcoin, and no key exists that could unlock it &mdash; the network does not even keep it on the list of coins that can be spent. Any bitcoin sent there is destroyed for good. Your own money travels in the other parts of the same transaction and comes back to you as normal.</p>
       </div>
       <div class="limit">
         <span class="lm-tag">Policy</span>
