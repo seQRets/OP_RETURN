@@ -1,6 +1,6 @@
 # OP_RETURN Message Builder
 
-**[→ Open the live tool](https://seqrets.github.io/OP_RETURN/)**
+**[→ Open the live tool](https://seqrets.github.io/op_return/)**
 
 A single-page tool for writing a permanent message to the Bitcoin blockchain. Type your text, watch it encode to hex in real time, then follow step-by-step instructions for either a Trezor hardware wallet or your own Bitcoin Core node.
 
@@ -44,7 +44,7 @@ An OP_RETURN output attaches a small piece of data to a Bitcoin transaction. Onc
 No server required — it's a static file:
 
 ```bash
-git clone https://github.com/seQRets/OP_RETURN.git
+git clone https://github.com/seQRets/op_return.git
 open OP_RETURN/index.html
 ```
 
