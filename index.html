@@ -290,7 +290,11 @@
   .limits { display: grid; gap: 0.7rem; }
   .limit {
     display: grid;
-    grid-template-columns: auto 1fr;
+    /* Each card is its own grid, so an auto column sizes to that card's own
+       tag and the body text starts at a different place in every row. A
+       floor wide enough for the longest tag lines them all up; max-content
+       keeps a wider fallback font from colliding with the text. */
+    grid-template-columns: minmax(6rem, max-content) 1fr;
     gap: 0.85rem;
     align-items: start;
     background: var(--panel);
