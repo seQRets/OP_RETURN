@@ -54,7 +54,7 @@ Or serve it if you prefer:
 python3 -m http.server 8000
 ```
 
-`index.html` and `opreturn-builder.html` are identical copies; the first is what GitHub Pages serves at the site root, the second keeps older direct links working.
+The whole tool is `index.html` — one file, nothing else to install.
 
 ## Privacy
 
