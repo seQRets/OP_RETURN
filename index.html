@@ -13,25 +13,25 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23e2841b'/><text x='16' y='23' font-size='19' font-family='monospace' font-weight='700' text-anchor='middle' fill='%23171a16'>0x</text></svg>">
 <style>
   :root {
-    --bg: #eceee9;
-    --bg-grad: radial-gradient(1200px 600px at 50% -10%, #f7f8f4 0%, #eceee9 55%, #e4e7e0 100%);
-    --ink: #14181c;
-    --ink-soft: #59606a;
-    --ink-faint: #8b9199;
-    --panel: #ffffff;
-    --panel-sunk: #f6f7f4;
-    --line: #d6d9d3;
-    --line-soft: #e4e7e1;
-    --term-bg: #14170f;
-    --term-text: #d7dbce;
-    --term-dim: #7c8276;
-    --term-hex: #a6d96a;
-    --term-line: #2c3226;
-    --accent: #e2841b;
-    --accent-ink: #b3620d;
-    --accent-wash: #fdf2e3;
-    --danger: #c2482e;
-    --danger-wash: #fbecea;
+    --bg: #f2ece0;
+    --bg-grad: radial-gradient(1200px 600px at 50% -10%, #faf6ec 0%, #f2ece0 55%, #ece4d4 100%);
+    --ink: #23201a;
+    --ink-soft: #635d52;
+    --ink-faint: #968f80;
+    --panel: #fcf9f2;
+    --panel-sunk: #f6f1e6;
+    --line: #ded5c2;
+    --line-soft: #eae2d3;
+    --term-bg: #211d16;
+    --term-text: #ded7c6;
+    --term-dim: #8a8271;
+    --term-hex: #b8d178;
+    --term-line: #3a342a;
+    --accent: #d2761a;
+    --accent-ink: #a8590c;
+    --accent-wash: #f7ecd9;
+    --danger: #b8412a;
+    --danger-wash: #f7e6e1;
     --ok: #4b8b3b;
     --radius: 10px;
     --radius-sm: 6px;
@@ -39,49 +39,52 @@
     --shadow-lift: 0 1px 2px rgba(20,24,28,.06), 0 14px 34px -12px rgba(20,24,28,.20);
     --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
     --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    /* Display face for the headline. Avenir Next (macOS) and Segoe UI (Windows)
+       both ship a genuine heavy weight; Roboto covers Android. */
+    --display: "Avenir Next", "Segoe UI", Roboto, "Helvetica Neue", -apple-system, sans-serif;
   }
   /* Dark palette. Applied when the OS asks for dark and the reader has not
      forced light, or when the toggle explicitly selects dark. */
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #101310;
-      --bg-grad: radial-gradient(1200px 600px at 50% -10%, #1c211c 0%, #141813 55%, #0e110e 100%);
-      --ink: #e8ebe4;
-      --ink-soft: #a0a89b;
-      --ink-faint: #737b6f;
-      --panel: #191d18;
-      --panel-sunk: #141812;
-      --line: #2d332b;
-      --line-soft: #242a22;
-      --term-bg: #0b0d09;
-      --term-line: #262b21;
+      --bg: #15120d;
+      --bg-grad: radial-gradient(1200px 600px at 50% -10%, #221e16 0%, #18150f 55%, #12100b 100%);
+      --ink: #ece6da;
+      --ink-soft: #a8a091;
+      --ink-faint: #7b7466;
+      --panel: #1f1b14;
+      --panel-sunk: #191610;
+      --line: #362f24;
+      --line-soft: #2a251c;
+      --term-bg: #100e09;
+      --term-line: #2e2820;
       --accent: #f0a04b;
       --accent-ink: #f0a04b;
-      --accent-wash: #2a1f10;
+      --accent-wash: #2e2110;
       --danger: #e2705a;
-      --danger-wash: #2b1613;
+      --danger-wash: #2e1813;
       --ok: #86c06f;
       --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px -8px rgba(0,0,0,.5);
       --shadow-lift: 0 1px 2px rgba(0,0,0,.5), 0 14px 34px -12px rgba(0,0,0,.7);
     }
   }
   :root[data-theme="dark"] {
-    --bg: #101310;
-    --bg-grad: radial-gradient(1200px 600px at 50% -10%, #1c211c 0%, #141813 55%, #0e110e 100%);
-    --ink: #e8ebe4;
-    --ink-soft: #a0a89b;
-    --ink-faint: #737b6f;
-    --panel: #191d18;
-    --panel-sunk: #141812;
-    --line: #2d332b;
-    --line-soft: #242a22;
-    --term-bg: #0b0d09;
-    --term-line: #262b21;
+    --bg: #15120d;
+    --bg-grad: radial-gradient(1200px 600px at 50% -10%, #221e16 0%, #18150f 55%, #12100b 100%);
+    --ink: #ece6da;
+    --ink-soft: #a8a091;
+    --ink-faint: #7b7466;
+    --panel: #1f1b14;
+    --panel-sunk: #191610;
+    --line: #362f24;
+    --line-soft: #2a251c;
+    --term-bg: #100e09;
+    --term-line: #2e2820;
     --accent: #f0a04b;
     --accent-ink: #f0a04b;
-    --accent-wash: #2a1f10;
+    --accent-wash: #2e2110;
     --danger: #e2705a;
-    --danger-wash: #2b1613;
+    --danger-wash: #2e1813;
     --ok: #86c06f;
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px -8px rgba(0,0,0,.5);
     --shadow-lift: 0 1px 2px rgba(0,0,0,.5), 0 14px 34px -12px rgba(0,0,0,.7);
@@ -144,36 +147,15 @@
     padding: 4rem 0 2.5rem;
     text-align: center;
   }
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--accent-ink);
-    background: var(--accent-wash);
-    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-    padding: 0.3rem 0.7rem;
-    border-radius: 100px;
-    margin-bottom: 1.25rem;
-  }
-  .badge::before {
-    content: "";
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-  }
   h1 {
-    font-family: var(--sans);
-    font-size: clamp(2.1rem, 6.8vw, 3.3rem);
-    font-weight: 200;
-    letter-spacing: -0.025em;
-    line-height: 1.06;
-    margin-bottom: 0.95rem;
+    font-family: var(--display);
+    font-size: clamp(2rem, 6vw, 3.05rem);
+    font-weight: 800;
+    letter-spacing: -0.032em;
+    line-height: 0.98;
+    margin-bottom: 1rem;
   }
-  h1 .op { color: var(--accent); font-weight: 300; }
+  h1 .op { color: var(--accent); }
   .lede {
     color: var(--ink-soft);
     font-size: 1.06rem;
@@ -196,27 +178,18 @@
     padding: 0.7rem 1.1rem;
     background: var(--panel-sunk);
     border-bottom: 1px solid var(--line-soft);
-    font-family: var(--mono);
-    font-size: 0.74rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    font-size: 0.82rem;
+    font-weight: 500;
     color: var(--ink-faint);
-  }
-  .console-bar .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--accent); flex-shrink: 0;
   }
   .console-body { padding: 1.4rem 1.4rem 1.5rem; }
 
   .field-label {
     display: block;
-    font-family: var(--mono);
-    font-size: 0.76rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    margin-bottom: 0.55rem;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
   }
   textarea {
     width: 100%;
@@ -303,14 +276,6 @@
 
   /* ---------- section furniture ---------- */
   .section { margin-top: 3.5rem; }
-  .section-kicker {
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--accent-ink);
-    margin-bottom: 0.5rem;
-  }
   h2 {
     font-size: 1.4rem;
     font-weight: 600;
@@ -340,18 +305,6 @@
     font-size: 0.98rem;
     font-weight: 600;
     margin-bottom: 0.3rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .info-card h3 .ic {
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    color: var(--accent);
-    background: var(--accent-wash);
-    border-radius: 4px;
-    padding: 0.1rem 0.35rem;
-    flex-shrink: 0;
   }
   .info-card p { color: var(--ink-soft); font-size: 0.92rem; }
 
@@ -363,7 +316,6 @@
     align-items: start;
     background: var(--panel);
     border: 1px solid var(--line);
-    border-left: 3px solid var(--accent);
     border-radius: var(--radius-sm);
     padding: 0.9rem 1.1rem;
   }
@@ -373,13 +325,12 @@
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--accent-ink);
+    color: var(--ink-faint);
     padding-top: 0.18rem;
     white-space: nowrap;
   }
   .limit p { font-size: 0.94rem; color: var(--ink-soft); }
   .limit p strong { color: var(--ink); font-weight: 600; }
-  .limit.warn { border-left-color: var(--danger); }
   .limit.warn .lm-tag { color: var(--danger); }
 
   /* ---------- path picker ---------- */
@@ -467,9 +418,9 @@
     font-family: var(--mono);
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--accent-ink);
-    background: var(--accent-wash);
-    border: 1.5px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    color: var(--ink-soft);
+    background: var(--panel-sunk);
+    border: 1.5px solid var(--line);
     border-radius: 50%;
     z-index: 1;
   }
@@ -591,10 +542,11 @@
     margin-bottom: 1.75rem;
   }
   .foot-brand .fb-name {
-    font-family: var(--mono);
-    font-weight: 600;
-    font-size: 0.95rem;
-    margin-bottom: 0.25rem;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.3rem;
   }
   .foot-brand .fb-name .op { color: var(--accent); }
   .foot-brand p {
@@ -611,8 +563,8 @@
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    font-family: var(--mono);
-    font-size: 0.8rem;
+    font-size: 0.86rem;
+    font-weight: 500;
     text-decoration: none;
     color: var(--ink);
     background: var(--panel);
@@ -670,13 +622,12 @@
   </button>
 
   <header class="masthead">
-    <span class="badge">Runs entirely in your browser</span>
     <h1><span class="op">OP_RETURN</span><br>Message Builder</h1>
     <p class="lede">Write a permanent message to the Bitcoin blockchain. Type it below, then follow the steps for your wallet. Nothing you type is sent anywhere.</p>
   </header>
 
   <section class="console" aria-label="Message encoder">
-    <div class="console-bar"><span class="dot"></span>encoder</div>
+    <div class="console-bar">Encoder</div>
     <div class="console-body">
       <label class="field-label" for="msg">Your message</label>
       <textarea id="msg" placeholder="Type the message you want to write to the blockchain" spellcheck="false" autocomplete="off"></textarea>
@@ -695,39 +646,37 @@
   </section>
 
   <section class="section" id="why">
-    <div class="section-kicker">The point of it</div>
     <h2>Why write to a blockchain at all?</h2>
     <p class="intro">An OP_RETURN output attaches a small piece of data to a Bitcoin transaction. Once that transaction confirms, the data is copied to every full node on Earth, stamped with a block time nobody controls, and it stays there. That combination &mdash; public, timestamped, and beyond anyone's reach to alter &mdash; is the whole reason people use it.</p>
     <div class="card-grid">
       <div class="info-card">
-        <h3><span class="ic">01</span>Proof it existed</h3>
+        <h3>Proof it existed</h3>
         <p>Publish the hash of a document, and you have proof that the exact file existed before that block was mined. Useful for manuscripts, designs, research data, and disclosures &mdash; without revealing the contents.</p>
       </div>
       <div class="info-card">
-        <h3><span class="ic">02</span>Notarization</h3>
+        <h3>Notarization</h3>
         <p>Contracts, audit logs, and records can be anchored to a block. Anyone can later verify the anchor themselves. There is no notary to trust, and no service that can go out of business and take the record with it.</p>
       </div>
       <div class="info-card">
-        <h3><span class="ic">03</span>Provenance</h3>
+        <h3>Provenance</h3>
         <p>Certificates, credentials, and supply-chain events can be committed on-chain so their history is checkable by anyone, forever, rather than living in one company's database.</p>
       </div>
       <div class="info-card">
-        <h3><span class="ic">04</span>Censorship resistance</h3>
+        <h3>Censorship resistance</h3>
         <p>A statement written into a block cannot be taken down, edited, or de-platformed. No host, registrar, or moderator sits between the message and the people reading it.</p>
       </div>
       <div class="info-card">
-        <h3><span class="ic">05</span>Protocol markers</h3>
+        <h3>Protocol markers</h3>
         <p>Other systems use OP_RETURN as a machine-readable tag &mdash; asset issuance, sidechain pegs, layer-two commitments, and cross-chain proofs all ride on it.</p>
       </div>
       <div class="info-card">
-        <h3><span class="ic">06</span>Because it lasts</h3>
+        <h3>Because it lasts</h3>
         <p>Memorials, dedications, and messages people simply want kept. It costs a few cents and it outlives every website you could otherwise put it on.</p>
       </div>
     </div>
   </section>
 
   <section class="section" id="limits">
-    <div class="section-kicker">Know before you write</div>
     <h2>What OP_RETURN can't do</h2>
     <p class="intro">It is a tiny, permanent, public noticeboard. Almost every mistake people make with it comes from expecting one of these six things to be otherwise.</p>
     <div class="limits">
@@ -759,7 +708,6 @@
   </section>
 
   <section class="section" id="paths">
-    <div class="section-kicker">Step by step</div>
     <h2>Pick your path</h2>
     <p class="intro">Both are self-custody. You hold the keys and sign the transaction either way. The full node path adds privacy and verification: your own node builds and broadcasts the transaction instead of a company server doing it for you.</p>
     <div class="path-cards">
