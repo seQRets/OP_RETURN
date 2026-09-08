@@ -631,11 +631,11 @@
 
   <section class="section" id="why">
     <h2>Why write to a blockchain at all?</h2>
-    <p class="intro">An OP_RETURN output attaches a small piece of data to a Bitcoin transaction. Once that transaction confirms, the data is copied to every full node on Earth, stamped with a block time nobody controls, and it stays there. That combination &mdash; public, timestamped, and beyond anyone's reach to alter &mdash; is the whole reason people use it.</p>
+    <p class="intro">An OP_RETURN output attaches a small piece of data to a Bitcoin transaction. Once that transaction confirms, the data is copied to every full node on Earth, stamped with a block time nobody controls, and it stays there. Public, timestamped, and beyond anyone's reach to alter. That combination is the whole reason people use it.</p>
     <div class="card-grid">
       <div class="info-card">
         <h3>Proof it existed</h3>
-        <p>Publish the hash of a document, and you have proof that the exact file existed before that block was mined. Useful for manuscripts, designs, research data, and disclosures &mdash; without revealing the contents.</p>
+        <p>Publish the hash of a document, and you have proof that the exact file existed before that block was mined. Useful for manuscripts, designs, research data, and disclosures, without revealing the contents.</p>
       </div>
       <div class="info-card">
         <h3>Notarization</h3>
@@ -651,7 +651,7 @@
       </div>
       <div class="info-card">
         <h3>Protocol markers</h3>
-        <p>Other systems use OP_RETURN as a machine-readable tag &mdash; asset issuance, sidechain pegs, layer-two commitments, and cross-chain proofs all ride on it.</p>
+        <p>Other systems use OP_RETURN as a machine-readable tag: asset issuance, sidechain pegs, layer-two commitments, and cross-chain proofs all ride on it.</p>
       </div>
       <div class="info-card">
         <h3>Because it lasts</h3>
@@ -666,7 +666,7 @@
     <div class="limits">
       <div class="limit">
         <span class="lm-tag">Size</span>
-        <p><strong>80 bytes is the safe limit.</strong> That is about one sentence. Watch out for accented letters and emoji, which use several bytes each &mdash; a plain emoji costs four, and one with a skin tone or built from several joined together can cost eight or more. The counter above shows the real cost as you type. You can go longer, but only by sending with Bitcoin Core v30 or newer, and even then some of the computers that make up the Bitcoin network may refuse to pass your message along, and nothing will tell you it happened. Trezor Suite will not send more than 80 bytes at all.</p>
+        <p><strong>80 bytes is the safe limit.</strong> That is about one sentence. Watch out for accented letters and emoji, which use several bytes each: a plain emoji costs four, and one with a skin tone or built from several joined together can cost eight or more. The counter above shows the real cost as you type. You can go longer, but only by sending with Bitcoin Core v30 or newer, and even then some of the computers that make up the Bitcoin network may refuse to pass your message along, and nothing will tell you it happened. Trezor Suite will not send more than 80 bytes at all.</p>
       </div>
       <div class="limit warn">
         <span class="lm-tag">Permanent</span>
@@ -678,15 +678,15 @@
       </div>
       <div class="limit">
         <span class="lm-tag">Storage</span>
-        <p><strong>It stores a fingerprint, not a file.</strong> You cannot put an image, a PDF, or a contract on-chain this way. The normal pattern is to publish a hash on-chain and keep the actual file elsewhere &mdash; the chain proves the file has not changed, but it does not host it.</p>
+        <p><strong>It stores a fingerprint, not a file.</strong> You cannot put an image, a PDF, or a contract on-chain this way. The normal pattern is to publish a hash on-chain and keep the actual file elsewhere. The chain proves the file has not changed, but it does not host it.</p>
       </div>
       <div class="limit">
         <span class="lm-tag">Value</span>
-        <p><strong>Nothing can ever be spent from it.</strong> The part of the transaction that carries your message holds no bitcoin, and no key exists that could unlock it &mdash; the network does not even keep it on the list of coins that can be spent. Any bitcoin sent there is destroyed for good. Your own money travels in the other parts of the same transaction and comes back to you as normal.</p>
+        <p><strong>Nothing can ever be spent from it.</strong> The part of the transaction that carries your message holds no bitcoin, and no key exists that could unlock it. The network does not even keep it on the list of coins that can be spent. Any bitcoin sent there is destroyed for good. Your own money travels in the other parts of the same transaction and comes back to you as normal.</p>
       </div>
       <div class="limit">
         <span class="lm-tag">Policy</span>
-        <p><strong>One message per transaction, and it costs a fee.</strong> A transaction can carry only one message. To send two, send two transactions. Either way you pay the normal Bitcoin fee for the extra bytes, and it takes just as long to confirm as any other transaction.</p>
+        <p><strong>One message per transaction, and it costs a fee.</strong> Assume one. That is the rule older nodes enforce, so it is what travels reliably. Bitcoin Core v30 and newer allow several in a single transaction, the same change that raised the size limit, but older nodes may not pass those on. Either way you pay the normal Bitcoin fee for the extra bytes, and it takes just as long to confirm as any other transaction.</p>
       </div>
     </div>
   </section>
@@ -716,7 +716,7 @@
 
         <div class="step">
           <div class="step-title">Reveal the message option</div>
-          <p class="step-desc">Click the small three-dot button in the top-right corner of the Send screen, above the Total panel, and choose Attach message. It is easy to miss. Not the Add label pencil next to the address field &mdash; that one is a private note stored on your computer only and never touches the blockchain.</p>
+          <p class="step-desc">Click the small three-dot button in the top-right corner of the Send screen, above the Total panel, and choose Attach message. It is easy to miss. Not the Add label pencil next to the address field. That one is a private note stored on your computer only and never touches the blockchain.</p>
         </div>
 
         <div class="step">
