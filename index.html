@@ -614,7 +614,7 @@
     <div class="console-bar">Encoder</div>
     <div class="console-body">
       <label class="field-label" for="msg">Your message</label>
-      <textarea id="msg" placeholder="Type the message you want to write to the blockchain" spellcheck="false" autocomplete="off"></textarea>
+      <textarea id="msg" placeholder="Type the message you want to write to the blockchain. Emoji work too 👍" spellcheck="false" autocomplete="off"></textarea>
 
       <div class="meter">
         <span class="count" id="byteCount">0 bytes</span>
@@ -666,7 +666,7 @@
     <div class="limits">
       <div class="limit">
         <span class="lm-tag">Size</span>
-        <p><strong>80 bytes is the safe limit.</strong> That is about one sentence. Watch out for accented letters and emoji, which use several bytes each &mdash; a single emoji can cost four. You can go longer, but only by sending with Bitcoin Core v30 or newer, and even then some of the computers that make up the Bitcoin network may quietly refuse to pass your message along. Trezor Suite will not send more than 80 bytes at all.</p>
+        <p><strong>80 bytes is the safe limit.</strong> That is about one sentence. Watch out for accented letters and emoji, which use several bytes each &mdash; a plain emoji costs four, and one with a skin tone or built from several joined together can cost eight or more. The counter above shows the real cost as you type. You can go longer, but only by sending with Bitcoin Core v30 or newer, and even then some of the computers that make up the Bitcoin network may quietly refuse to pass your message along. Trezor Suite will not send more than 80 bytes at all.</p>
       </div>
       <div class="limit warn">
         <span class="lm-tag">Permanent</span>
