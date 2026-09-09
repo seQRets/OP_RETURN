@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OP_RETURN Builder tests</title>
+<title>Does this application work?</title>
 <style>
   :root {
     /* the light palette from index.html */
@@ -156,6 +156,12 @@
     border: 0;
   }
 
+  /* Checks that matter to whoever maintains this, not to a visitor. */
+  #devout { margin-top: 2.75rem; opacity: 0.62; }
+  #devout h2 { font-size: 0.9rem; color: var(--ink-soft); }
+  #devout .t { padding: 0.5rem 0.8rem; font-size: 0.87rem; }
+  #devout .t .mark { width: 18px; height: 18px; font-size: 0.72rem; }
+
   .footnote {
     margin-top: 2.5rem;
     font-size: 0.86rem;
@@ -181,21 +187,25 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>Does the builder <span class="op">actually work</span>?</h1>
-    <p class="sub">Opening this page runs the real builder, invisibly, and puts it through every check below. Typing messages, pasting things into the wrong box, going over the size limit. Green means it did the right thing just now, on your computer, in your own browser.</p>
-    <p class="sub">You do not have to understand every line. If the bar below is green, the tool behaved. If it is ever red, something is broken and the builder should not be trusted until it is fixed.</p>
-    <a class="back" href="index.html">Back to the builder</a>
+    <h1>Does this application <span class="op">actually work</span>?</h1>
+    <p class="sub">Opening this page runs the real application, invisibly, and puts it through every check below. Typing messages, pasting things into the wrong box, going over the size limit. Green means it did the right thing just now, on your computer, in your own browser.</p>
+    <p class="sub">You do not have to understand every line. If the bar below is green, the tool behaved. If it is ever red, something is broken and the application should not be trusted until it is fixed.</p>
+    <a class="back" href="index.html">Back to the app</a>
   </header>
   <div id="summary">running…</div>
   <div id="out"></div>
+  <div id="devout"></div>
   <p class="footnote">For developers: this page loads <code>index.html</code> in a hidden frame and asserts against its live DOM, so a regression in the shipped file fails here rather than in a copy of the logic. It has to be served over http, because a browser will not let a page opened from disk read into its own frame.</p>
-  <p class="footnote"><a class="back" href="index.html">Back to the builder</a></p>
+  <p class="footnote"><a class="back" href="index.html">Back to the app</a></p>
 </div>
 <iframe id="app" title="page under test" aria-hidden="true" tabindex="-1"></iframe>
 
 <script>
 (function () {
   var out = document.getElementById('out');
+  var devOut = document.getElementById('devout');
+  var target = out;
+  function devSection() { target = devOut; }
   var summary = document.getElementById('summary');
   var pass = 0, fail = 0;
   var doc, win;
@@ -203,7 +213,7 @@
   function group(name) {
     var h = document.createElement('h2');
     h.textContent = name;
-    out.appendChild(h);
+    target.appendChild(h);
   }
 
   function is(label, actual, expected) {
@@ -221,7 +231,7 @@
     row.className = 't ' + (good ? 'ok' : 'no');
     row.innerHTML = '<span class="mark">' + (good ? '✓' : '✗') + '</span>' +
                     '<span class="label">' + label + (why ? '<span class="why">' + why + '</span>' : '') + '</span>';
-    out.appendChild(row);
+    target.appendChild(row);
   }
 
   // ---- driving the page under test ----
@@ -349,10 +359,13 @@
     $('modeConsole').click();
     ok('The size is shown next to the command, not only at the top', $('payloadBytes').textContent === '4 bytes');
 
-    group('Promises this site makes to you');
-    is('The page opens light, whatever your computer prefers', win.getComputedStyle(doc.body).backgroundColor, 'rgb(242, 236, 224)');
-    is('The page contacts no other computer, so nothing you type leaves it', win.performance.getEntriesByType('resource').length, 0);
-    ok('No em dashes anywhere in the writing', !/[–—]/.test(doc.body.innerText));
+    group('What this page promises you');
+    is('It contacts no other computer, so nothing you type ever leaves it', win.performance.getEntriesByType('resource').length, 0);
+
+    devSection();
+    group('Also checked, for whoever maintains this');
+    is('Opens in light mode regardless of the computer\u2019s setting', win.getComputedStyle(doc.body).backgroundColor, 'rgb(242, 236, 224)');
+    ok('No em dashes in the writing', !/[\u2013\u2014]/.test(doc.body.innerText));
     reset();
   }
 
