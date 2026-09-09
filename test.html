@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OP_RETURN Builder tests</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 15px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif;
+    margin: 0; padding: 2rem 1.25rem 4rem;
+    background: #f2ece0; color: #23201a;
+  }
+  @media (prefers-color-scheme: dark) { body { background: #15120d; color: #ece6da; } }
+  .wrap { max-width: 820px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 .35rem; }
+  .sub { color: #635d52; margin-bottom: 1.5rem; }
+  @media (prefers-color-scheme: dark) { .sub { color: #a8a091; } }
+  #summary {
+    font: 600 1rem/1.4 ui-monospace, Menlo, monospace;
+    padding: .9rem 1.1rem; border-radius: 8px; margin-bottom: 1.5rem;
+    background: #e8e0cf; border: 1px solid #ded5c2;
+  }
+  @media (prefers-color-scheme: dark) { #summary { background: #1f1b14; border-color: #362f24; } }
+  #summary.pass { background: #e6f0e0; border-color: #4b8b3b; color: #2f5c24; }
+  #summary.fail { background: #f7e6e1; border-color: #b8412a; color: #8e2f1e; }
+  h2 { font-size: .82rem; text-transform: uppercase; letter-spacing: .08em;
+       color: #968f80; margin: 1.6rem 0 .5rem; }
+  .t { display: flex; gap: .6rem; padding: .3rem 0; align-items: baseline;
+       font: 13px/1.5 ui-monospace, Menlo, monospace; border-bottom: 1px solid rgba(128,128,128,.15); }
+  .t .mark { flex: none; width: 1.2rem; font-weight: 700; }
+  .t.ok .mark { color: #4b8b3b; }
+  .t.no .mark { color: #b8412a; }
+  .t.no { background: rgba(184,65,42,.08); }
+  .t .why { color: #b8412a; }
+  iframe { position: absolute; width: 1024px; height: 800px; left: -9999px; top: 0; border: 0; }
+  code { background: rgba(128,128,128,.15); padding: 0 .25rem; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>OP_RETURN Builder tests</h1>
+  <p class="sub">Drives the real <code>index.html</code> in a hidden frame and asserts against its actual DOM, so a regression in the shipped file fails here. Must be served over http, not opened from disk, or the frame cannot be read.</p>
+  <div id="summary">running…</div>
+  <div id="out"></div>
+</div>
+<iframe id="app"></iframe>
+
+<script>
+(function () {
+  var out = document.getElementById('out');
+  var summary = document.getElementById('summary');
+  var pass = 0, fail = 0;
+  var doc, win;
+
+  function group(name) {
+    var h = document.createElement('h2');
+    h.textContent = name;
+    out.appendChild(h);
+  }
+
+  function is(label, actual, expected) {
+    var ok = String(actual) === String(expected);
+    record(ok, label, ok ? '' : 'got ' + JSON.stringify(actual) + ', wanted ' + JSON.stringify(expected));
+  }
+
+  function ok(label, cond, why) {
+    record(!!cond, label, cond ? '' : (why || 'condition was false'));
+  }
+
+  function record(good, label, why) {
+    good ? pass++ : fail++;
+    var row = document.createElement('div');
+    row.className = 't ' + (good ? 'ok' : 'no');
+    row.innerHTML = '<span class="mark">' + (good ? '✓' : '✗') + '</span>' +
+                    '<span>' + label + (why ? ' <span class="why">' + why + '</span>' : '') + '</span>';
+    out.appendChild(row);
+  }
+
+  // ---- driving the page under test ----
+  function $(id) { return doc.getElementById(id); }
+  function mode(m) { $(m === 'hex' ? 'inHex' : 'inText').click(); }
+  function type(v) {
+    var t = $('msg');
+    t.value = v;
+    t.dispatchEvent(new win.Event('input'));
+  }
+  function reset() { mode('text'); type(''); }
+  function bytes() { return $('byteCount').textContent; }
+  function hex() { return $('hexOut').textContent; }
+  function warnHex() { return !$('hexHint').hidden; }
+  function warnB64() { return !$('b64Hint').hidden; }
+  function cmd() { return doc.querySelector('#cmd1 .cmd-text').textContent; }
+
+  var HASH = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+  var ANCHOR = 'kDyEkR4EJG0KWNQWEBNoWKS32wV9mPwe0+iTOheUQr27yxbJI9mF5nlSa2qafVtCNlrdNiztDIIm' +
+               'ePA5Rqs3CSZRi1P2kojjtbim3bSWU6YpmFMaPO0oAUs0MUAEkhNz/pHjgRnxyXxFGH4On5xvTQVE' +
+               'Dqq7i2SwtrZTCJsdgfIPHw245aughLHo32Kqcuz9RvWSrHc1st+zXMB+z4V2dbHSWwS3TxGRwxep' +
+               'l8vpHHQ31QGupVvKm3U949fRXjxHQXXXup5mViPx6kNxqT0zEiffBlz3slLCPgHVAfQMmy/O3XnB' +
+               'djuwk3mr+jRGGSb03Wlkhlevx8RmYosWdBgrGK4bJXIPQOqE5pHCRQhmi/StqP14doAFCAxi+Hn8' +
+               'vsPOovT/zeAj9ip+WGNQ+KjICYQuCPefeGtvsZ6vvhN4Ch4Z1T6DFm021vUg+60/U7S0TovcPkVb' +
+               'vUz6aLYNFgVPoSJTJqGP1mESywwn8CmDKuNmUEv9om3sI63tRkADe8uGnzLpN3fKj7SCPqTEu+lr' +
+               'Jp+E6cz9oTeXrpMc6tv+D3UZoa8LqcwXRy8=';
+
+  function run() {
+    group('Text encoding');
+    reset();
+    type('gm');
+    is('"gm" is 2 bytes', bytes(), '2 bytes');
+    is('"gm" encodes to 676d', hex(), '676d');
+    type('\u{1F44D}');
+    is('a plain emoji costs 4 bytes', bytes(), '4 bytes');
+    type('\u{1F44D}\u{1F3FB}');
+    is('a skin-toned emoji costs 8 bytes', bytes(), '8 bytes');
+    type('café');
+    is('an accented letter costs 2 bytes', bytes(), '5 bytes');
+
+    group('Hex input');
+    reset(); mode('hex');
+    type('deadbeef');
+    is('hex is taken as given', hex(), 'deadbeef');
+    is('4 hex bytes counted', bytes(), '4 bytes');
+    type('0x DE AD BE EF');
+    is('0x, spacing and case are normalised', hex(), 'deadbeef');
+    type(HASH);
+    is('a 32-byte hash counts as 32 bytes', bytes(), '32 bytes');
+    type('abc');
+    is('odd length is rejected', bytes(), 'invalid');
+    ok('odd length says why', $('byteNote').textContent.indexOf('Odd') === 0);
+    ok('invalid input never reaches the command', cmd().indexOf('your-hex-appears-here') > -1);
+    type('zzz!!!');
+    is('non-hex is rejected', bytes(), 'invalid');
+
+    group('Base64 case sensitivity');
+    // Both decode cleanly and differ. Lowercasing before detection would
+    // corrupt the payload with no error anywhere.
+    reset(); mode('hex');
+    type('SGVsbG8=');
+    ok('uppercase base64 is detected', warnB64());
+    $('convB64').click();
+    is('SGVsbG8= converts to 48656c6c6f', hex(), '48656c6c6f');
+    reset(); mode('hex');
+    type('sgvsbg8=');
+    $('convB64').click();
+    is('sgvsbg8= converts to b20bec6e0f', hex(), 'b20bec6e0f');
+    ok('the two cases give different bytes', '48656c6c6f' !== 'b20bec6e0f');
+
+    group('Hex pasted into the text field');
+    reset();
+    type(HASH);
+    is('hex as text double-encodes to 64 bytes', bytes(), '64 bytes');
+    ok('and is flagged', warnHex());
+    $('toHexMode').click();
+    is('switching fixes it to 32 bytes', bytes(), '32 bytes');
+    is('and the bytes are the hash itself', hex(), HASH);
+
+    group('Base64 pasted into the text field');
+    reset();
+    type(ANCHOR);
+    is('base64 as text is 568 bytes', bytes(), '568 bytes');
+    ok('and is flagged', warnB64());
+    $('convB64').click();
+    is('converting gives the real 425 bytes', bytes(), '425 bytes');
+    ok('command carries the converted payload', cmd().indexOf('903c84911e04') > -1);
+
+    group('No false positives on ordinary text');
+    reset();
+    [['a sentence', 'This is a perfectly ordinary message I would like to write to the blockchain'],
+     ['punctuation', 'Hello, world! This is a test of the emergency broadcast system, stand by.'],
+     ['a URL', 'https://seqrets.github.io/op_return/index.html?something=value&more=stuff'],
+     ['one long unbroken word', 'Supercalifragilisticexpialidociousandthensomemorewordsjustkeepgoingonandon'],
+     ['64 chars of joined words', 'Thequickbrownfoxjumpsoverthelazydogandthenrunsawayveryfastyes'],
+     ['an emoji message', 'gm bitcoin \u{1F44D}\u{1F3FB} have a wonderful day everyone out there']
+    ].forEach(function (c) {
+      type(c[1]);
+      ok(c[0] + ' is not flagged', !warnHex() && !warnB64());
+    });
+
+    group('Trezor size gate');
+    reset();
+    type('x'.repeat(80));
+    ok('exactly 80 bytes is allowed', !$('pickTrezor').classList.contains('is-disabled'));
+    type('x'.repeat(81));
+    ok('81 bytes disables the card', $('pickTrezor').classList.contains('is-disabled'));
+    is('and marks it for assistive tech', $('pickTrezor').getAttribute('aria-disabled'), 'true');
+    ok('steps are hidden', $('trezorSteps').hidden);
+    ok('a way out is offered', !$('trezorBlocked').hidden);
+    $('pickCore').click();
+    $('pickTrezor').click();
+    is('the disabled card ignores clicks', $('pickTrezor').getAttribute('aria-pressed'), 'false');
+    type('short');
+    ok('going back under restores it', !$('pickTrezor').classList.contains('is-disabled'));
+    reset(); mode('hex'); type(HASH);
+    ok('a 32-byte hash keeps Trezor available', !$('pickTrezor').classList.contains('is-disabled'));
+
+    group('Commands');
+    reset(); mode('hex'); type('deadbeef');
+    ok('console form has no bitcoin-cli prefix', cmd().indexOf('bitcoin-cli') === -1);
+    $('modeTerminal').click();
+    ok('terminal form adds bitcoin-cli', cmd().indexOf('bitcoin-cli') === 0);
+    ok('terminal form quotes the JSON', cmd().indexOf("'[]'") > -1);
+    $('modeConsole').click();
+    ok('payload appears beside the command', $('payloadBytes').textContent === '4 bytes');
+
+    group('Promises the README makes');
+    is('light is the default theme', win.getComputedStyle(doc.body).backgroundColor, 'rgb(242, 236, 224)');
+    is('the page makes no network requests', win.performance.getEntriesByType('resource').length, 0);
+    ok('no em dashes in the copy', !/[–—]/.test(doc.body.innerText));
+    reset();
+  }
+
+  var frame = document.getElementById('app');
+  frame.addEventListener('load', function () {
+    try {
+      doc = frame.contentDocument;
+      win = frame.contentWindow;
+      if (!doc || !doc.getElementById('msg')) throw new Error('frame not readable');
+    } catch (e) {
+      summary.className = 'fail';
+      summary.textContent = 'Cannot read the page under test. Serve this over http, for example: python3 -m http.server 8000';
+      return;
+    }
+    try {
+      run();
+    } catch (e) {
+      record(false, 'the suite itself threw', String(e && e.message || e));
+    }
+    summary.className = fail ? 'fail' : 'pass';
+    summary.textContent = fail
+      ? fail + ' failed, ' + pass + ' passed'
+      : 'all ' + pass + ' passed';
+  });
+
+  // Set last, and uncached: loading a stale index.html would let the suite
+  // pass against code that is not the code on disk.
+  frame.src = 'index.html?t=' + Date.now();
+})();
+</script>
+</body>
+</html>

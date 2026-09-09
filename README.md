@@ -78,9 +78,25 @@ The page makes zero network requests. No fonts, scripts, trackers, or analytics 
 
 The only outbound links are the three in the footer, and you have to click them.
 
+## Tests
+
+`test.html` loads `index.html` in a hidden frame and drives the real page, asserting against its actual DOM. It is not part of the tool and `index.html` does not know it exists, so the single-file constraint is untouched.
+
+Serve the folder and open it. It will not work opened straight from disk, because a browser will not let a `file://` page read into its own frame:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then visit `http://localhost:8000/test.html`. Green means every assertion passed.
+
+It covers byte counting including emoji, hex normalisation and rejection, base64 detection in both fields, the double-encoding guards and their one-click fixes, the false-positive sweep over ordinary prose, the 80-byte Trezor gate, command formatting, and the promises this README makes about the default theme and zero network requests.
+
+The suite was checked by breaking the code on purpose: reintroducing the lowercase-before-base64-detection bug turns it red on the exact assertion written for it.
+
 ## Contributing
 
-Issues and pull requests are welcome. Keep it a single dependency-free file, that constraint is the point.
+Issues and pull requests are welcome. Keep `index.html` a single dependency-free file, that constraint is the point. If you change behaviour, add an assertion to `test.html`.
 
 ## Support
 
