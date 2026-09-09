@@ -478,6 +478,49 @@
   }
 
   /* ---------- tracks & steps ---------- */
+  .path-card.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .path-card.is-disabled:hover {
+    border-color: var(--line);
+    transform: none;
+  }
+  .pc-lock {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--danger);
+  }
+  .track-block {
+    background: var(--danger-wash);
+    border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.2rem;
+  }
+  .track-block p {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin-bottom: 0.9rem;
+  }
+  .track-block strong { color: var(--danger); }
+  .blockbtn {
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 0.55rem 1.05rem;
+    border-radius: 100px;
+    border: 1.5px solid var(--danger);
+    background: transparent;
+    color: var(--danger);
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .blockbtn:hover { background: var(--danger); color: var(--panel); }
+  .blockbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
   .track { margin-top: 2rem; }
   .track[hidden] { display: none; }
 
@@ -776,6 +819,7 @@
       <button class="path-card" id="pickTrezor" aria-pressed="true">
         <span class="pc-title">Trezor hardware wallet</span>
         <span class="pc-sub">About five clicks in Trezor Suite, no command line.</span>
+        <span class="pc-lock" id="trezorLock" hidden>Not available over 80 bytes</span>
       </button>
       <button class="path-card" id="pickCore" aria-pressed="false">
         <span class="pc-title">Bitcoin Core full node</span>
@@ -784,6 +828,12 @@
     </div>
 
     <div class="track" id="trackTrezor">
+      <div class="track-block" id="trezorBlocked" hidden>
+        <p><strong>Too long for this path.</strong> Your message is <span id="blockedBytes">0</span> bytes and Trezor Suite will not send more than 80. Shorten it, or use a full node instead.</p>
+        <button class="blockbtn" id="switchToCore" type="button">Use the Bitcoin Core path</button>
+      </div>
+
+      <div id="trezorSteps">
       <p class="track-note">Everything here happens in <a href="https://trezor.io" target="_blank" rel="noopener noreferrer">Trezor Suite</a>, the desktop app for your Trezor device. The message rides along on a normal payment. Simplest version: send a small amount to a fresh receive address in your own account, so the coins come right back to you and you only pay the miner fee.</p>
 
       <div class="steps">
@@ -812,6 +862,7 @@
           <div class="step-title">See it on-chain</div>
           <p class="step-desc">Search the transaction ID on mempool.space. The explorer decodes the OP_RETURN output back to readable text on the transaction page.</p>
         </div>
+      </div>
       </div>
     </div>
 
@@ -960,6 +1011,15 @@
   var msgEcho = document.querySelector('#msgEcho .cmd-text');
   var nextBtn = document.getElementById('nextBtn');
   var trezorPaste = document.getElementById('trezorPaste');
+  var trezorBlocked = document.getElementById('trezorBlocked');
+  var trezorSteps = document.getElementById('trezorSteps');
+  var trezorLock = document.getElementById('trezorLock');
+  var blockedBytes = document.getElementById('blockedBytes');
+  var trezorUsable = true;
+  var pickTrezor = document.getElementById('pickTrezor');
+  var pickCore = document.getElementById('pickCore');
+  var trackTrezor = document.getElementById('trackTrezor');
+  var trackCore = document.getElementById('trackCore');
   var LIMIT = 80;
   var enc = new TextEncoder();
   var inputMode = 'text';
@@ -1042,6 +1102,7 @@
 
     currentHex = hex;
     renderCommands();
+    applyTrezorLimit(n, !problem && n > LIMIT);
 
     nextBtn.classList.toggle('is-ready', hex.length > 0);
 
@@ -1052,6 +1113,18 @@
     } else {
       msgEcho.innerHTML = '<span class="empty">Your message appears as you type.</span>';
     }
+  }
+
+  // Over 80 bytes the Trezor steps cannot work, so they are put out of reach
+  // rather than left there to be followed into a failure.
+  function applyTrezorLimit(n, blocked) {
+    trezorUsable = !blocked;
+    blockedBytes.textContent = n;
+    trezorBlocked.hidden = !blocked;
+    trezorSteps.hidden = blocked;
+    trezorLock.hidden = !blocked;
+    pickTrezor.classList.toggle('is-disabled', blocked);
+    pickTrezor.setAttribute('aria-disabled', blocked ? 'true' : 'false');
   }
 
   var inText = document.getElementById('inText');
@@ -1077,10 +1150,6 @@
     document.getElementById('paths').scrollIntoView();
   });
 
-  var pickTrezor = document.getElementById('pickTrezor');
-  var pickCore = document.getElementById('pickCore');
-  var trackTrezor = document.getElementById('trackTrezor');
-  var trackCore = document.getElementById('trackCore');
 
   function selectPath(which) {
     var trezor = which === 'trezor';
@@ -1090,7 +1159,13 @@
     trackCore.hidden = trezor;
   }
 
-  pickTrezor.addEventListener('click', function () { selectPath('trezor'); });
+  pickTrezor.addEventListener('click', function () {
+    if (!trezorUsable) return;
+    selectPath('trezor');
+  });
+  document.getElementById('switchToCore').addEventListener('click', function () {
+    selectPath('core');
+  });
   pickCore.addEventListener('click', function () { selectPath('core'); });
 
   function renderCommands() {
