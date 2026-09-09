@@ -26,7 +26,7 @@ One HTML file. No dependencies, no build step, no analytics, no network requests
 
 An OP_RETURN output attaches a small piece of data to a Bitcoin transaction. Once confirmed, that data is copied to every full node on Earth, timestamped by a block nobody controls, and it stays there. Common uses:
 
-- **Proof of existence.** Publish a document's hash to prove the exact file existed before a given block, without revealing its contents.
+- **Proof of existence.** Publish a document's hash to prove the exact file existed before a given block, without revealing its contents. Make one with `shasum -a 256 yourfile` on macOS or Linux, or `certutil -hashfile yourfile SHA256` on Windows, and paste the result into the hex tab.
 - **Notarization.** Anchor contracts, audit logs, or records so anyone can verify them later, with no notary and no service that can disappear.
 - **Provenance.** Commit certificates, credentials, or supply-chain events to a public, checkable history.
 - **Censorship resistance.** A statement in a block cannot be taken down, edited, or de-platformed.

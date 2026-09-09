@@ -447,6 +447,48 @@
   }
   .info-card p { color: var(--ink-soft); font-size: 0.92rem; }
 
+  .howto {
+    margin-top: 1.1rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1rem 1.15rem;
+    box-shadow: var(--shadow);
+  }
+  .howto-label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+  .howto code {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    background: var(--term-bg);
+    color: var(--term-hex);
+    border: 1px solid var(--term-line);
+    border-radius: 4px;
+    padding: 0.45rem 0.6rem;
+    overflow-wrap: anywhere;
+    user-select: all;
+  }
+  .howto p {
+    margin-top: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    max-width: 66ch;
+  }
+  .howto p code {
+    display: inline;
+    background: var(--panel-sunk);
+    color: var(--ink-soft);
+    border-color: var(--line);
+    padding: 0.05rem 0.28rem;
+    font-size: 0.95em;
+  }
+
   .limits { display: grid; gap: 0.7rem; }
   .limit {
     display: grid;
@@ -997,6 +1039,12 @@
         <h3>Because it lasts</h3>
         <p>Memorials, dedications, and messages people simply want kept. It costs a few cents and it outlives every website you could otherwise put it on.</p>
       </div>
+    </div>
+
+    <div class="howto">
+      <span class="howto-label">Making a hash of a file</span>
+      <code>shasum -a 256 yourfile</code>
+      <p>That works on macOS and Linux. On Windows it is <code>certutil -hashfile yourfile SHA256</code>. Either way it prints 64 characters. Paste those into the Hex tab at the top and you are publishing the fingerprint of the file, not the file itself.</p>
     </div>
   </section>
 
