@@ -853,7 +853,7 @@
       </div>
 
       <div class="inputwarn" id="b64Hint" hidden>
-        <p><strong>That looks like base64, not hex.</strong> This field takes hex, so the two need converting first.</p>
+        <p id="b64Msg"><strong>That looks like base64, not hex.</strong> This field takes hex, so the two need converting first.</p>
         <button class="warnbtn" id="convB64" type="button">Convert it to hex</button>
       </div>
 
@@ -1082,6 +1082,9 @@
   var payloadBytes = document.getElementById('payloadBytes');
   var payloadNote = document.getElementById('payloadNote');
   var pendingB64 = '';
+  var b64Msg = document.getElementById('b64Msg');
+  var B64_IN_HEX  = '<strong>That looks like base64, not hex.</strong> This field takes hex, so the two need converting first.';
+  var B64_IN_TEXT = '<strong>That looks like base64.</strong> Entered as text it publishes those characters rather than the data they stand for, which is bigger and not what you meant.';
   var trezorUsable = true;
   var pickTrezor = document.getElementById('pickTrezor');
   var pickCore = document.getElementById('pickCore');
@@ -1125,6 +1128,14 @@
     return v.length >= 64 && v.length % 2 === 0 && /^[0-9a-fA-F]+$/.test(v);
   }
 
+  // The base64 alphabet covers ordinary words too, so this asks for more:
+  // no whitespace at all, long, and an exact number of 4-character groups.
+  // Prose almost never satisfies all three.
+  function textLooksLikeBase64(raw) {
+    var v = raw.trim();
+    return v.length >= 64 && !/\s/.test(v) && looksBase64(v);
+  }
+
   function toHex(bytes) {
     var out = '';
     for (var i = 0; i < bytes.length; i++) {
@@ -1166,8 +1177,12 @@
       hex = toHex(bytes);
       n = bytes.length;
       showHexHint = textLooksLikeHex(raw);
+      if (!showHexHint && textLooksLikeBase64(raw)) {
+        pendingB64 = raw.trim();
+      }
     }
 
+    b64Msg.innerHTML = inputMode === 'hex' ? B64_IN_HEX : B64_IN_TEXT;
     hexHint.hidden = !showHexHint;
     b64Hint.hidden = !pendingB64;
 
@@ -1264,7 +1279,7 @@
   document.getElementById('convB64').addEventListener('click', function () {
     if (!pendingB64) return;
     msg.value = base64ToHex(pendingB64);
-    update();
+    selectInput('hex');
     msg.focus();
   });
 

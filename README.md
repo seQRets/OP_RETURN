@@ -12,7 +12,7 @@ One HTML file. No dependencies, no build step, no analytics, no network requests
 
 - **Live hex encoding.** Your text converted to the hex that OP_RETURN actually carries, updating as you type.
 - **Hex input mode.** Paste raw hex instead of text, for anchoring a file hash or any payload that is not readable text. Spacing, newlines, a `0x` prefix and either case are all accepted.
-- **Paste safeguards.** Hex pasted into the text field would be encoded a second time, doubling the size and publishing the wrong bytes while the command still looked correct. Long hex-looking text is now flagged with a one-click switch to hex mode. Base64 pasted into the hex field is recognised as base64 and can be converted in place.
+- **Paste safeguards.** Hex or base64 pasted into the text field would be published as those characters rather than the data they stand for: bigger, and not what you meant, while the command still looked correct. Both are now recognised in either field and converted in one click.
 - **The byte count appears twice**, once under the message and again beside the funding command, so the size is on screen at the moment you copy rather than only at the top of the page.
 - **Byte meter.** A running count against the 80-byte limit, with a warning when you cross it. Accented letters and emoji cost several bytes each, so this is not a character count: a plain emoji costs 4 bytes, one with a skin tone costs 8.
 - **A guided flow.** Type a message, press Next, pick your wallet, follow the steps. The next action is always on screen.
