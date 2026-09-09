@@ -12,6 +12,8 @@ One HTML file. No dependencies, no build step, no analytics, no network requests
 
 - **Live hex encoding.** Your text converted to the hex that OP_RETURN actually carries, updating as you type.
 - **Hex input mode.** Paste raw hex instead of text, for anchoring a file hash or any payload that is not readable text. Spacing, newlines, a `0x` prefix and either case are all accepted.
+- **Paste safeguards.** Hex pasted into the text field would be encoded a second time, doubling the size and publishing the wrong bytes while the command still looked correct. Long hex-looking text is now flagged with a one-click switch to hex mode. Base64 pasted into the hex field is recognised as base64 and can be converted in place.
+- **The byte count appears twice**, once under the message and again beside the funding command, so the size is on screen at the moment you copy rather than only at the top of the page.
 - **Byte meter.** A running count against the 80-byte limit, with a warning when you cross it. Accented letters and emoji cost several bytes each, so this is not a character count: a plain emoji costs 4 bytes, one with a skin tone costs 8.
 - **A guided flow.** Type a message, press Next, pick your wallet, follow the steps. The next action is always on screen.
 - **Two paths.** Trezor Suite, about five clicks and no command line, or Bitcoin Core, four commands on your own node.
@@ -35,12 +37,18 @@ An OP_RETURN output attaches a small piece of data to a Bitcoin transaction. Onc
 
 | | |
 |---|---|
-| **Size** | 80 bytes is the safe limit, roughly one sentence. You can go longer, but only by sending with Bitcoin Core v30 or newer, and even then some of the computers that make up the network may refuse to pass it along, with nothing to tell you it happened. Trezor Suite will not send more than 80 bytes at all. |
+| **Size** | 80 bytes is the safe limit, roughly one sentence. Past it the Trezor path is switched off in the page, since Suite will not send it, and the tool points you at Bitcoin Core instead. You can go longer, but only by sending with Bitcoin Core v30 or newer, and even then some of the computers that make up the network may refuse to pass it along, with nothing to tell you it happened. Trezor Suite will not send more than 80 bytes at all. |
 | **Permanent** | There is no delete. Once confirmed it is on every node forever, and nobody can edit or retract it. |
 | **Public** | It is not encrypted. Anyone can read it in a block explorer, permanently linked to the transaction that carried it. Never write anything private or identifying. |
 | **Storage** | It stores a fingerprint, not a file. You cannot put an image or a PDF on-chain this way. Publish a hash and keep the actual file elsewhere. |
 | **Value** | Nothing can ever be spent from the message output. It carries zero bitcoin, no key can unlock it, and any coins sent there are destroyed. Your own funds ride in the transaction's other outputs. |
 | **Policy** | Assume one message per transaction, since that is the rule older nodes enforce and therefore what travels reliably. Bitcoin Core v30 and newer allow several in a single transaction, but older nodes may not pass those on. You pay the ordinary miner fee for the bytes either way. |
+
+## Sending more than 80 bytes
+
+Larger payloads are a normal thing to want, not an error, and the page treats them that way. Above 80 bytes it stops describing the message as too long and simply states the requirement: Bitcoin Core v30 or newer.
+
+The Trezor path is a different matter. Trezor Suite will not send more than 80 bytes at all, so above that limit the Trezor card is disabled and its steps are replaced with your byte count and a link through to the Bitcoin Core path. The trigger is size, not input mode: a 32-byte hash pasted as hex is well inside the limit, so that path stays available.
 
 ## Running it locally
 

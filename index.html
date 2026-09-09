@@ -221,6 +221,50 @@
   }
   .hexbox.bad { color: var(--danger); font-style: normal; }
 
+  .inputwarn {
+    margin-top: 0.9rem;
+    background: var(--accent-wash);
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+    border-radius: var(--radius-sm);
+    padding: 0.85rem 1rem;
+  }
+  .inputwarn p {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin-bottom: 0.7rem;
+  }
+  .inputwarn strong { color: var(--accent-ink); }
+  .warnbtn {
+    font-family: var(--sans);
+    font-size: 0.84rem;
+    font-weight: 600;
+    padding: 0.45rem 0.95rem;
+    border-radius: 100px;
+    border: 1.5px solid var(--accent-ink);
+    background: transparent;
+    color: var(--accent-ink);
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .warnbtn:hover { background: var(--accent-ink); color: var(--panel); }
+  .warnbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .payload-size {
+    margin-top: 0.5rem;
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+    text-align: right;
+  }
+  .payload-size strong {
+    font-family: var(--mono);
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .payload-size.over strong { color: var(--accent-ink); }
+  .payload-size.bad strong { color: var(--danger); }
+  .payload-size span { display: block; font-size: 0.82rem; color: var(--ink-faint); }
+
   .field-label {
     display: block;
     font-size: 0.95rem;
@@ -268,6 +312,11 @@
     border: 1px solid var(--line-soft);
   }
   .meter .count.over {
+    color: var(--accent-ink);
+    background: var(--accent-wash);
+    border-color: color-mix(in srgb, var(--accent) 38%, transparent);
+  }
+  .meter .count.bad {
     color: var(--danger);
     background: var(--danger-wash);
     border-color: color-mix(in srgb, var(--danger) 35%, transparent);
@@ -288,7 +337,8 @@
     border-radius: 3px;
     transition: width .2s cubic-bezier(.4,0,.2,1);
   }
-  .bar-fill.over { background: var(--danger); }
+  .bar-fill.over { background: var(--accent-ink); }
+  .bar-fill.bad { background: var(--danger); }
 
   .hexout { margin-top: 1.6rem; }
   .hexbox {
@@ -797,6 +847,16 @@
       </div>
       <div class="bar"><div class="bar-fill" id="barFill"></div></div>
 
+      <div class="inputwarn" id="hexHint" hidden>
+        <p><strong>That looks like hex, not text.</strong> Entered as text it gets encoded a second time, which doubles the size and publishes the wrong bytes. The command would still look correct.</p>
+        <button class="warnbtn" id="toHexMode" type="button">Switch to Hex mode</button>
+      </div>
+
+      <div class="inputwarn" id="b64Hint" hidden>
+        <p><strong>That looks like base64, not hex.</strong> This field takes hex, so the two need converting first.</p>
+        <button class="warnbtn" id="convB64" type="button">Convert it to hex</button>
+      </div>
+
       <div class="hexout">
         <label class="field-label">Hex encoding</label>
         <div class="hexbox" id="hexOut"><span class="empty">Your message in hex appears as you type. OP_RETURN data travels as hex, which is just your text written in base 16.</span></div>
@@ -880,6 +940,7 @@
           <div class="step-title">Create the funded transaction</div>
           <p class="step-desc">Core picks an unspent output from your wallet to fund the transaction, adds the OP_RETURN output with your message, and sends change back to you. It returns a PSBT, a partially signed bitcoin transaction. That is a draft transaction waiting for a signature.</p>
           <div class="term" id="cmd1"><button class="copy" data-target="cmd1">copy</button><span class="cmd-text"></span></div>
+          <p class="payload-size" id="payloadSize">Payload: <strong id="payloadBytes">0 bytes</strong><span id="payloadNote"></span></p>
         </div>
 
         <div class="step">
@@ -1015,6 +1076,12 @@
   var trezorSteps = document.getElementById('trezorSteps');
   var trezorLock = document.getElementById('trezorLock');
   var blockedBytes = document.getElementById('blockedBytes');
+  var hexHint = document.getElementById('hexHint');
+  var b64Hint = document.getElementById('b64Hint');
+  var payloadSize = document.getElementById('payloadSize');
+  var payloadBytes = document.getElementById('payloadBytes');
+  var payloadNote = document.getElementById('payloadNote');
+  var pendingB64 = '';
   var trezorUsable = true;
   var pickTrezor = document.getElementById('pickTrezor');
   var pickCore = document.getElementById('pickCore');
@@ -1032,8 +1099,30 @@
   var TREZOR_HEX  = 'Use the right box, the hex one, and paste the hex from below into it. Suite decodes it into the left box for you, which will look like nonsense if your hex is not readable text. That is fine and expected for a hash.';
 
   // Accept what people actually paste: spacing, newlines, a 0x prefix, any case.
-  function normalizeHex(raw) {
-    return raw.replace(/\s+/g, '').replace(/^0x/i, '').toLowerCase();
+  // Case is preserved here because base64 detection needs it.
+  function compact(raw) {
+    return raw.replace(/\s+/g, '').replace(/^0x/i, '');
+  }
+
+  function looksBase64(v) {
+    if (v.length < 4 || v.length % 4 !== 0) return false;
+    if (!/^[A-Za-z0-9+/]+={0,2}$/.test(v)) return false;
+    try { atob(v); return true; } catch (e) { return false; }
+  }
+
+  function base64ToHex(v) {
+    var bin = atob(v), out = '';
+    for (var i = 0; i < bin.length; i++) {
+      out += bin.charCodeAt(i).toString(16).padStart(2, '0');
+    }
+    return out;
+  }
+
+  // Long, even-length, hex-only text is almost certainly a pasted payload.
+  // 64 characters is a 32-byte hash, the smallest realistic one.
+  function textLooksLikeHex(raw) {
+    var v = raw.trim();
+    return v.length >= 64 && v.length % 2 === 0 && /^[0-9a-fA-F]+$/.test(v);
   }
 
   function toHex(bytes) {
@@ -1050,36 +1139,54 @@
     var n = 0;
     var problem = '';
 
+    pendingB64 = '';
+    var showHexHint = false;
+
     if (inputMode === 'hex') {
-      hex = normalizeHex(raw);
-      if (hex === '') {
+      var c = compact(raw);
+      var lower = c.toLowerCase();
+      if (c === '') {
         n = 0;
-      } else if (!/^[0-9a-f]+$/.test(hex)) {
-        problem = 'Not hex. Only the digits 0-9 and the letters a-f.';
-      } else if (hex.length % 2 !== 0) {
-        problem = 'Odd number of characters. Every byte needs two.';
+      } else if (/^[0-9a-f]+$/.test(lower)) {
+        if (lower.length % 2 !== 0) {
+          problem = 'Odd number of characters. Every byte needs two.';
+        } else {
+          hex = lower;
+          n = hex.length / 2;
+        }
+      } else if (looksBase64(c)) {
+        problem = 'That looks like base64, not hex.';
+        pendingB64 = c;
       } else {
-        n = hex.length / 2;
+        problem = 'Not hex. Only the digits 0-9 and the letters a-f.';
       }
       if (problem) { hex = ''; n = 0; }
     } else {
       var bytes = enc.encode(raw);
       hex = toHex(bytes);
       n = bytes.length;
+      showHexHint = textLooksLikeHex(raw);
     }
+
+    hexHint.hidden = !showHexHint;
+    b64Hint.hidden = !pendingB64;
 
     if (problem) {
       byteCount.textContent = 'invalid';
-      byteCount.classList.add('over');
+      byteCount.classList.add('bad');
+      byteCount.classList.remove('over');
       byteNote.textContent = problem;
       barFill.style.width = '0%';
-      barFill.classList.add('over');
+      barFill.classList.add('bad');
+      barFill.classList.remove('over');
     } else {
       byteCount.textContent = n + (n === 1 ? ' byte' : ' bytes');
+      byteCount.classList.remove('bad');
       byteCount.classList.toggle('over', n > LIMIT);
 
       var pct = Math.min(100, (n / LIMIT) * 100);
       barFill.style.width = pct + '%';
+      barFill.classList.remove('bad');
       barFill.classList.toggle('over', n > LIMIT);
 
       if (n === 0) {
@@ -1087,9 +1194,17 @@
       } else if (n <= LIMIT) {
         byteNote.textContent = (LIMIT - n) + ' of 80 bytes left.';
       } else {
-        byteNote.textContent = 'Too long for Trezor Suite. Sending this needs Bitcoin Core v30 or newer.';
+        byteNote.textContent = 'Needs Bitcoin Core v30 or newer.';
       }
     }
+
+    // The same figure, repeated where the command is actually copied.
+    payloadSize.classList.toggle('bad', !!problem);
+    payloadSize.classList.toggle('over', !problem && n > LIMIT);
+    payloadBytes.textContent = problem ? 'nothing yet' : n + (n === 1 ? ' byte' : ' bytes');
+    payloadNote.textContent = problem
+      ? 'Fix the input above before sending this.'
+      : (n > LIMIT ? 'Needs Bitcoin Core v30 or newer.' : '');
 
     hexOut.classList.toggle('bad', !!problem);
     if (problem) {
@@ -1139,6 +1254,19 @@
     trezorPaste.textContent = which === 'hex' ? TREZOR_HEX : TREZOR_TEXT;
     update();
   }
+
+  document.getElementById('toHexMode').addEventListener('click', function () {
+    msg.value = msg.value.trim();
+    selectInput('hex');
+    msg.focus();
+  });
+
+  document.getElementById('convB64').addEventListener('click', function () {
+    if (!pendingB64) return;
+    msg.value = base64ToHex(pendingB64);
+    update();
+    msg.focus();
+  });
 
   inText.addEventListener('click', function () { selectInput('text'); });
   inHex.addEventListener('click', function () { selectInput('hex'); });
