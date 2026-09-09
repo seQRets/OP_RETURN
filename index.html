@@ -452,6 +452,17 @@
     padding-left: 0.9rem;
     border-left: 2px solid var(--line);
   }
+  .track-note a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: var(--line);
+  }
+  .track-note a:hover {
+    color: var(--accent-ink);
+    text-decoration-color: var(--accent);
+  }
+  .track-note a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   .steps {
     counter-reset: step;
@@ -730,7 +741,7 @@
     </div>
 
     <div class="track" id="trackTrezor">
-      <p class="track-note">The message rides along on a normal payment. Simplest version: send a small amount to a fresh receive address in your own account, so the coins come right back to you and you only pay the miner fee.</p>
+      <p class="track-note">Everything here happens in <a href="https://trezor.io" target="_blank" rel="noopener noreferrer">Trezor Suite</a>, the desktop app for your Trezor device. The message rides along on a normal payment. Simplest version: send a small amount to a fresh receive address in your own account, so the coins come right back to you and you only pay the miner fee.</p>
 
       <div class="steps">
         <div class="step">
@@ -762,7 +773,7 @@
     </div>
 
     <div class="track" id="trackCore" hidden>
-      <p class="track-note">This path needs a wallet inside Bitcoin Core itself, created with createwallet and holding some bitcoin. That wallet is separate from any hardware wallet. If your node just verifies blocks and your coins live on a Trezor or other signing device, send a small amount to a Core wallet address first, since Core needs coins it controls to fund and sign the transaction. Your message is already substituted into the commands below.</p>
+      <p class="track-note">This path needs a wallet inside <a href="https://bitcoincore.org/" target="_blank" rel="noopener noreferrer">Bitcoin Core</a> itself, created with createwallet and holding some bitcoin. That wallet is separate from any hardware wallet. If your node just verifies blocks and your coins live on a Trezor or other signing device, send a small amount to a Core wallet address first, since Core needs coins it controls to fund and sign the transaction. Your message is already substituted into the commands below.</p>
       <p class="track-note">No terminal needed. The Bitcoin Core app has a built-in console: Window menu, then Node window, then the Console tab. Pick below where you'll run the commands and they reformat to match, so what you copy is exactly what you run. The console shows a red warning about scammers who trick people into pasting commands. That warning is right, and the rule it implies is the one to follow: never run commands you don't understand. Each step below says what its command does, so read before you run.</p>
 
       <div class="mode-toggle" role="group" aria-label="Where you'll run the commands">
