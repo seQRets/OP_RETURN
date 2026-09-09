@@ -1084,7 +1084,7 @@
   var pendingB64 = '';
   var b64Msg = document.getElementById('b64Msg');
   var B64_IN_HEX  = '<strong>That looks like base64, not hex.</strong> This field takes hex, so the two need converting first.';
-  var B64_IN_TEXT = '<strong>That looks like base64.</strong> Entered as text it publishes those characters rather than the data they stand for, which is bigger and not what you meant.';
+  var B64_IN_TEXT = '<strong>That looks like base64.</strong> Entered as text it publishes those characters rather than the data they stand for, which is bigger and may not be what you meant.';
   var trezorUsable = true;
   var pickTrezor = document.getElementById('pickTrezor');
   var pickCore = document.getElementById('pickCore');
@@ -1095,9 +1095,9 @@
   var inputMode = 'text';
 
   var TEXT_PLACEHOLDER = 'Type the message you want to write to the blockchain. Emoji work too \uD83D\uDC4D';
-  var HEX_PLACEHOLDER  = 'Paste raw hex, for example the SHA-256 hash of a file you want to timestamp';
+  var HEX_PLACEHOLDER  = 'Paste raw hex, for example a file\u2019s SHA-256 hash. Base64 is recognised here too and converted in one click.';
   var TEXT_HINT = 'Your message in hex appears as you type. OP_RETURN data travels as hex, which is just your text written in base 16.';
-  var HEX_HINT  = 'Paste hex above and it is used exactly as given. Two characters make one byte.';
+  var HEX_HINT  = 'Paste hex above and it is used exactly as given. Two characters make one byte. Base64 is recognised and can be converted.';
   var TREZOR_TEXT = 'Use the left box, the plain text one. Emoji work fine, Suite converts them for you. The hex box on the right fills automatically, and it will match the hex encoding shown above. Copy your message from below.';
   var TREZOR_HEX  = 'Use the right box, the hex one, and paste the hex from below into it. Suite decodes it into the left box for you, which will look like nonsense if your hex is not readable text. That is fine and expected for a hash.';
 
