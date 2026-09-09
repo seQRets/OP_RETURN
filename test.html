@@ -144,6 +144,18 @@
     margin-top: 0.2rem;
   }
 
+  /* The page under test has to render to be measurable, so it is moved out of
+     view rather than hidden. The size is fixed so no assertion depends on the
+     window width or trips the builder's mobile breakpoint. */
+  #app {
+    position: absolute;
+    left: -10000px;
+    top: 0;
+    width: 1024px;
+    height: 900px;
+    border: 0;
+  }
+
   @media (max-width: 560px) {
     body { padding: 0 1rem 3rem; }
     header { padding: 2.5rem 0 1.5rem; }
@@ -161,7 +173,7 @@
   <div id="summary">running…</div>
   <div id="out"></div>
 </div>
-<iframe id="app"></iframe>
+<iframe id="app" title="page under test" aria-hidden="true" tabindex="-1"></iframe>
 
 <script>
 (function () {
