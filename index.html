@@ -253,8 +253,25 @@
     font-style: italic;
   }
 
+  /* ---------- pre-send warning ---------- */
+  .warnstrip {
+    margin-top: 1.25rem;
+    background: var(--danger-wash);
+    border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+    border-radius: var(--radius);
+    padding: 0.9rem 1.1rem;
+  }
+  .warnstrip p { font-size: 0.94rem; color: var(--ink-soft); max-width: 66ch; }
+  .warnstrip strong { color: var(--danger); }
+  .warnstrip a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .warnstrip a:hover { color: var(--danger); }
+
   /* ---------- section furniture ---------- */
-  .section { margin-top: 3.5rem; }
+  .section { margin-top: 3.5rem; scroll-margin-top: 1.5rem; }
   h2 {
     font-size: 1.4rem;
     font-weight: 600;
@@ -629,67 +646,9 @@
     </div>
   </section>
 
-  <section class="section" id="why">
-    <h2>Why write to a blockchain at all?</h2>
-    <p class="intro">An OP_RETURN output attaches a small piece of data to a Bitcoin transaction. Once that transaction confirms, the data is copied to every full node on Earth, stamped with a block time nobody controls, and it stays there. Public, timestamped, and beyond anyone's reach to alter. That combination is the whole reason people use it.</p>
-    <div class="card-grid">
-      <div class="info-card">
-        <h3>Proof it existed</h3>
-        <p>Publish the hash of a document, and you have proof that the exact file existed before that block was mined. Useful for manuscripts, designs, research data, and disclosures, without revealing the contents.</p>
-      </div>
-      <div class="info-card">
-        <h3>Notarization</h3>
-        <p>Contracts, audit logs, and records can be anchored to a block. Anyone can later verify the anchor themselves. There is no notary to trust, and no service that can go out of business and take the record with it.</p>
-      </div>
-      <div class="info-card">
-        <h3>Provenance</h3>
-        <p>Certificates, credentials, and supply-chain events can be committed on-chain so their history is checkable by anyone, forever, rather than living in one company's database.</p>
-      </div>
-      <div class="info-card">
-        <h3>Censorship resistance</h3>
-        <p>A statement written into a block cannot be taken down, edited, or de-platformed. No host, registrar, or moderator sits between the message and the people reading it.</p>
-      </div>
-      <div class="info-card">
-        <h3>Protocol markers</h3>
-        <p>Other systems use OP_RETURN as a machine-readable tag: asset issuance, sidechain pegs, layer-two commitments, and cross-chain proofs all ride on it.</p>
-      </div>
-      <div class="info-card">
-        <h3>Because it lasts</h3>
-        <p>Memorials, dedications, and messages people simply want kept. It costs a few cents and it outlives every website you could otherwise put it on.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="limits">
-    <h2>What OP_RETURN can't do</h2>
-    <p class="intro">It is a tiny, permanent, public noticeboard. Almost every mistake people make with it comes from expecting one of these six things to be otherwise.</p>
-    <div class="limits">
-      <div class="limit">
-        <span class="lm-tag">Size</span>
-        <p><strong>80 bytes is the safe limit.</strong> That is about one sentence. Watch out for accented letters and emoji, which use several bytes each: a plain emoji costs four, and one with a skin tone or built from several joined together can cost eight or more. The counter above shows the real cost as you type. You can go longer, but only by sending with Bitcoin Core v30 or newer, and even then some of the computers that make up the Bitcoin network may refuse to pass your message along, and nothing will tell you it happened. Trezor Suite will not send more than 80 bytes at all.</p>
-      </div>
-      <div class="limit warn">
-        <span class="lm-tag">Permanent</span>
-        <p><strong>There is no delete.</strong> Once it confirms, it is on every node forever. It cannot be edited, retracted, or taken down by you or anyone else. Read your message twice before you broadcast it.</p>
-      </div>
-      <div class="limit warn">
-        <span class="lm-tag">Public</span>
-        <p><strong>It is not encrypted.</strong> Anyone can read it in any block explorer, and it is permanently linked to the transaction that carried it, which may connect it to your other addresses. Never write anything private, identifying, or regrettable.</p>
-      </div>
-      <div class="limit">
-        <span class="lm-tag">Storage</span>
-        <p><strong>It stores a fingerprint, not a file.</strong> You cannot put an image, a PDF, or a contract on-chain this way. The normal pattern is to publish a hash on-chain and keep the actual file elsewhere. The chain proves the file has not changed, but it does not host it.</p>
-      </div>
-      <div class="limit">
-        <span class="lm-tag">Value</span>
-        <p><strong>Nothing can ever be spent from it.</strong> The part of the transaction that carries your message holds no bitcoin, and no key exists that could unlock it. The network does not even keep it on the list of coins that can be spent. Any bitcoin sent there is destroyed for good. Your own money travels in the other parts of the same transaction and comes back to you as normal.</p>
-      </div>
-      <div class="limit">
-        <span class="lm-tag">Policy</span>
-        <p><strong>One message per transaction, and it costs a fee.</strong> Assume one. That is the rule older nodes enforce, so it is what travels reliably. Bitcoin Core v30 and newer allow several in a single transaction, the same change that raised the size limit, but older nodes may not pass those on. Either way you pay the normal Bitcoin fee for the extra bytes, and it takes just as long to confirm as any other transaction.</p>
-      </div>
-    </div>
-  </section>
+  <aside class="warnstrip" aria-label="Before you send">
+    <p><strong>Before you send.</strong> Whatever you write is permanent and public. Once it confirms, nobody can edit or delete it, and it is not encrypted, so treat it as something the whole world can read forever. <a href="#limits">The full limits are further down.</a></p>
+  </aside>
 
   <section class="section" id="paths">
     <h2>Pick your path</h2>
@@ -775,6 +734,68 @@
           <div class="step-title">See it on-chain</div>
           <p class="step-desc">Search the transaction ID on mempool.space, or in your own explorer if you run one. The OP_RETURN output decodes back to readable text on the transaction page.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="why">
+    <h2>Why write to a blockchain at all?</h2>
+    <p class="intro">An OP_RETURN output attaches a small piece of data to a Bitcoin transaction. Once that transaction confirms, the data is copied to every full node on Earth, stamped with a block time nobody controls, and it stays there. Public, timestamped, and beyond anyone's reach to alter. That combination is the whole reason people use it.</p>
+    <div class="card-grid">
+      <div class="info-card">
+        <h3>Proof it existed</h3>
+        <p>Publish the hash of a document, and you have proof that the exact file existed before that block was mined. Useful for manuscripts, designs, research data, and disclosures, without revealing the contents.</p>
+      </div>
+      <div class="info-card">
+        <h3>Notarization</h3>
+        <p>Contracts, audit logs, and records can be anchored to a block. Anyone can later verify the anchor themselves. There is no notary to trust, and no service that can go out of business and take the record with it.</p>
+      </div>
+      <div class="info-card">
+        <h3>Provenance</h3>
+        <p>Certificates, credentials, and supply-chain events can be committed on-chain so their history is checkable by anyone, forever, rather than living in one company's database.</p>
+      </div>
+      <div class="info-card">
+        <h3>Censorship resistance</h3>
+        <p>A statement written into a block cannot be taken down, edited, or de-platformed. No host, registrar, or moderator sits between the message and the people reading it.</p>
+      </div>
+      <div class="info-card">
+        <h3>Protocol markers</h3>
+        <p>Other systems use OP_RETURN as a machine-readable tag: asset issuance, sidechain pegs, layer-two commitments, and cross-chain proofs all ride on it.</p>
+      </div>
+      <div class="info-card">
+        <h3>Because it lasts</h3>
+        <p>Memorials, dedications, and messages people simply want kept. It costs a few cents and it outlives every website you could otherwise put it on.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="limits">
+    <h2>What OP_RETURN can't do</h2>
+    <p class="intro">It is a tiny, permanent, public noticeboard. Almost every mistake people make with it comes from expecting one of these six things to be otherwise.</p>
+    <div class="limits">
+      <div class="limit">
+        <span class="lm-tag">Size</span>
+        <p><strong>80 bytes is the safe limit.</strong> That is about one sentence. Watch out for accented letters and emoji, which use several bytes each: a plain emoji costs four, and one with a skin tone or built from several joined together can cost eight or more. The counter above shows the real cost as you type. You can go longer, but only by sending with Bitcoin Core v30 or newer, and even then some of the computers that make up the Bitcoin network may refuse to pass your message along, and nothing will tell you it happened. Trezor Suite will not send more than 80 bytes at all.</p>
+      </div>
+      <div class="limit warn">
+        <span class="lm-tag">Permanent</span>
+        <p><strong>There is no delete.</strong> Once it confirms, it is on every node forever. It cannot be edited, retracted, or taken down by you or anyone else. Read your message twice before you broadcast it.</p>
+      </div>
+      <div class="limit warn">
+        <span class="lm-tag">Public</span>
+        <p><strong>It is not encrypted.</strong> Anyone can read it in any block explorer, and it is permanently linked to the transaction that carried it, which may connect it to your other addresses. Never write anything private, identifying, or regrettable.</p>
+      </div>
+      <div class="limit">
+        <span class="lm-tag">Storage</span>
+        <p><strong>It stores a fingerprint, not a file.</strong> You cannot put an image, a PDF, or a contract on-chain this way. The normal pattern is to publish a hash on-chain and keep the actual file elsewhere. The chain proves the file has not changed, but it does not host it.</p>
+      </div>
+      <div class="limit">
+        <span class="lm-tag">Value</span>
+        <p><strong>Nothing can ever be spent from it.</strong> The part of the transaction that carries your message holds no bitcoin, and no key exists that could unlock it. The network does not even keep it on the list of coins that can be spent. Any bitcoin sent there is destroyed for good. Your own money travels in the other parts of the same transaction and comes back to you as normal.</p>
+      </div>
+      <div class="limit">
+        <span class="lm-tag">Policy</span>
+        <p><strong>One message per transaction, and it costs a fee.</strong> Assume one. That is the rule older nodes enforce, so it is what travels reliably. Bitcoin Core v30 and newer allow several in a single transaction, the same change that raised the size limit, but older nodes may not pass those on. Either way you pay the normal Bitcoin fee for the extra bytes, and it takes just as long to confirm as any other transaction.</p>
       </div>
     </div>
   </section>
