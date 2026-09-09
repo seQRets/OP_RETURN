@@ -66,6 +66,10 @@
     --shadow-lift: 0 1px 2px rgba(0,0,0,.5), 0 14px 34px -12px rgba(0,0,0,.7);
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+
   :root { color-scheme: light; }
   :root[data-theme="dark"] { color-scheme: dark; }
 
@@ -138,6 +142,26 @@
     max-width: 52ch;
     margin: 0 auto;
   }
+
+  .topnav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-top: 1.6rem;
+  }
+  .topnav a {
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: var(--ink-soft);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    padding: 0.4rem 0.95rem;
+    transition: color .15s ease, border-color .15s ease;
+  }
+  .topnav a:hover { color: var(--accent-ink); border-color: var(--accent); }
+  .topnav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* ---------- the tool card ---------- */
   .console {
@@ -625,6 +649,11 @@
   <header class="masthead">
     <h1><span class="op">OP_RETURN</span><br>Message Builder</h1>
     <p class="lede">Write a permanent message to the Bitcoin blockchain. Type it below, then follow the steps for your wallet. Nothing you type is sent anywhere.</p>
+    <nav class="topnav" aria-label="Jump to a section">
+      <a href="#paths">How to send it</a>
+      <a href="#why">What is OP_RETURN?</a>
+      <a href="#limits">Limitations</a>
+    </nav>
   </header>
 
   <section class="console" aria-label="Message encoder">
@@ -647,7 +676,7 @@
   </section>
 
   <aside class="warnstrip" aria-label="Before you send">
-    <p><strong>Before you send.</strong> Whatever you write is permanent and public. Once it confirms, nobody can edit or delete it, and it is not encrypted, so treat it as something the whole world can read forever. <a href="#limits">The full limits are further down.</a></p>
+    <p><strong>Before you send.</strong> Whatever you write is permanent and public. Once it confirms, nobody can edit or delete it, and it is not encrypted, so treat it as something the whole world can read forever.</p>
   </aside>
 
   <section class="section" id="paths">
