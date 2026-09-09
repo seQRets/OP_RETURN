@@ -156,6 +156,21 @@
     border: 0;
   }
 
+  .footnote {
+    margin-top: 2.5rem;
+    font-size: 0.86rem;
+    color: var(--ink-faint);
+    max-width: 66ch;
+  }
+  .footnote code {
+    font-family: var(--mono);
+    font-size: 0.9em;
+    background: var(--panel-sunk);
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    padding: 0.05rem 0.3rem;
+  }
+
   @media (max-width: 560px) {
     body { padding: 0 1rem 3rem; }
     header { padding: 2.5rem 0 1.5rem; }
@@ -166,12 +181,15 @@
 <body>
 <div class="wrap">
   <header>
-    <h1><span class="op">OP_RETURN</span> Builder tests</h1>
-    <p class="sub">Drives the real <code>index.html</code> in a hidden frame and asserts against its actual DOM, so a regression in the shipped file fails here. Must be served over http, not opened from disk, or the frame cannot be read.</p>
+    <h1>Does the builder <span class="op">actually work</span>?</h1>
+    <p class="sub">Opening this page runs the real builder, invisibly, and puts it through every check below. Typing messages, pasting things into the wrong box, going over the size limit. Green means it did the right thing just now, on your computer, in your own browser.</p>
+    <p class="sub">You do not have to understand every line. If the bar below is green, the tool behaved. If it is ever red, something is broken and the builder should not be trusted until it is fixed.</p>
     <a class="back" href="index.html">Back to the builder</a>
   </header>
   <div id="summary">running…</div>
   <div id="out"></div>
+  <p class="footnote">For developers: this page loads <code>index.html</code> in a hidden frame and asserts against its live DOM, so a regression in the shipped file fails here rather than in a copy of the logic. It has to be served over http, because a browser will not let a page opened from disk read into its own frame.</p>
+  <p class="footnote"><a class="back" href="index.html">Back to the builder</a></p>
 </div>
 <iframe id="app" title="page under test" aria-hidden="true" tabindex="-1"></iframe>
 
@@ -232,109 +250,109 @@
                'Jp+E6cz9oTeXrpMc6tv+D3UZoa8LqcwXRy8=';
 
   function run() {
-    group('Text encoding');
+    group('Turning your message into the blockchain format');
     reset();
     type('gm');
-    is('"gm" is 2 bytes', bytes(), '2 bytes');
-    is('"gm" encodes to 676d', hex(), '676d');
+    is('A two-letter message counts as 2 bytes', bytes(), '2 bytes');
+    is('and is written to the chain as 676d', hex(), '676d');
     type('\u{1F44D}');
-    is('a plain emoji costs 4 bytes', bytes(), '4 bytes');
+    is('A plain emoji uses up 4 bytes', bytes(), '4 bytes');
     type('\u{1F44D}\u{1F3FB}');
-    is('a skin-toned emoji costs 8 bytes', bytes(), '8 bytes');
+    is('An emoji with a skin tone uses up 8, not 4', bytes(), '8 bytes');
     type('café');
-    is('an accented letter costs 2 bytes', bytes(), '5 bytes');
+    is('An accented letter, like the e in cafe, uses up 2', bytes(), '5 bytes');
 
-    group('Hex input');
+    group('Pasting in raw data instead of typing a message');
     reset(); mode('hex');
     type('deadbeef');
-    is('hex is taken as given', hex(), 'deadbeef');
-    is('4 hex bytes counted', bytes(), '4 bytes');
+    is('Raw data you paste is used exactly as pasted', hex(), 'deadbeef');
+    is('and eight characters of it count as 4 bytes', bytes(), '4 bytes');
     type('0x DE AD BE EF');
-    is('0x, spacing and case are normalised', hex(), 'deadbeef');
+    is('Stray spaces, capitals and a leading 0x are tidied up for you', hex(), 'deadbeef');
     type(HASH);
-    is('a 32-byte hash counts as 32 bytes', bytes(), '32 bytes');
+    is('A file fingerprint counts as 32 bytes', bytes(), '32 bytes');
     type('abc');
-    is('odd length is rejected', bytes(), 'invalid');
-    ok('odd length says why', $('byteNote').textContent.indexOf('Odd') === 0);
-    ok('invalid input never reaches the command', cmd().indexOf('your-hex-appears-here') > -1);
+    is('Data with a character missing is refused', bytes(), 'invalid');
+    ok('and the page says what is wrong with it', $('byteNote').textContent.indexOf('Odd') === 0);
+    ok('Refused data never sneaks into the command you copy', cmd().indexOf('your-hex-appears-here') > -1);
     type('zzz!!!');
-    is('non-hex is rejected', bytes(), 'invalid');
+    is('Something that is not raw data at all is refused', bytes(), 'invalid');
 
-    group('Base64 case sensitivity');
+    group('Capital letters have to be kept');
     // Both decode cleanly and differ. Lowercasing before detection would
     // corrupt the payload with no error anywhere.
     reset(); mode('hex');
     type('SGVsbG8=');
-    ok('uppercase base64 is detected', warnB64());
+    ok('Data written with capitals is recognised', warnB64());
     $('convB64').click();
-    is('SGVsbG8= converts to 48656c6c6f', hex(), '48656c6c6f');
+    is('and converts to the correct bytes', hex(), '48656c6c6f');
     reset(); mode('hex');
     type('sgvsbg8=');
     $('convB64').click();
-    is('sgvsbg8= converts to b20bec6e0f', hex(), 'b20bec6e0f');
-    ok('the two cases give different bytes', '48656c6c6f' !== 'b20bec6e0f');
+    is('The same letters in lower case are a different thing entirely', hex(), 'b20bec6e0f');
+    ok('so the capitals are never quietly thrown away', '48656c6c6f' !== 'b20bec6e0f');
 
-    group('Hex pasted into the text field');
+    group('Pasting raw data into the wrong box');
     reset();
     type(HASH);
-    is('hex as text double-encodes to 64 bytes', bytes(), '64 bytes');
-    ok('and is flagged', warnHex());
+    is('Raw data typed as a message would publish twice as much', bytes(), '64 bytes');
+    ok('so the page warns you before you pay for it', warnHex());
     $('toHexMode').click();
-    is('switching fixes it to 32 bytes', bytes(), '32 bytes');
-    is('and the bytes are the hash itself', hex(), HASH);
+    is('One click puts it right, back to 32 bytes', bytes(), '32 bytes');
+    is('and what gets published is the fingerprint itself', hex(), HASH);
 
-    group('Base64 pasted into the text field');
+    group('Pasting the other kind of raw data into the wrong box');
     reset();
     type(ANCHOR);
-    is('base64 as text is 568 bytes', bytes(), '568 bytes');
-    ok('and is flagged', warnB64());
+    is('The other kind of raw data would publish 568 bytes', bytes(), '568 bytes');
+    ok('so the page warns you about that too', warnB64());
     $('convB64').click();
-    is('converting gives the real 425 bytes', bytes(), '425 bytes');
-    ok('command carries the converted payload', cmd().indexOf('903c84911e04') > -1);
+    is('Converting it gives the real 425 bytes', bytes(), '425 bytes');
+    ok('and the command you copy carries the corrected version', cmd().indexOf('903c84911e04') > -1);
 
-    group('No false positives on ordinary text');
+    group('Ordinary messages are left alone');
     reset();
-    [['a sentence', 'This is a perfectly ordinary message I would like to write to the blockchain'],
-     ['punctuation', 'Hello, world! This is a test of the emergency broadcast system, stand by.'],
-     ['a URL', 'https://seqrets.github.io/op_return/index.html?something=value&more=stuff'],
-     ['one long unbroken word', 'Supercalifragilisticexpialidociousandthensomemorewordsjustkeepgoingonandon'],
-     ['64 chars of joined words', 'Thequickbrownfoxjumpsoverthelazydogandthenrunsawayveryfastyes'],
-     ['an emoji message', 'gm bitcoin \u{1F44D}\u{1F3FB} have a wonderful day everyone out there']
+    [['An ordinary sentence', 'This is a perfectly ordinary message I would like to write to the blockchain'],
+     ['A sentence with punctuation', 'Hello, world! This is a test of the emergency broadcast system, stand by.'],
+     ['A web address', 'https://seqrets.github.io/op_return/index.html?something=value&more=stuff'],
+     ['One very long word', 'Supercalifragilisticexpialidociousandthensomemorewordsjustkeepgoingonandon'],
+     ['Words run together with no spaces', 'Thequickbrownfoxjumpsoverthelazydogandthenrunsawayveryfastyes'],
+     ['A message with emoji', 'gm bitcoin \u{1F44D}\u{1F3FB} have a wonderful day everyone out there']
     ].forEach(function (c) {
       type(c[1]);
-      ok(c[0] + ' is not flagged', !warnHex() && !warnB64());
+      ok(c[0] + ' is not mistaken for raw data', !warnHex() && !warnB64());
     });
 
-    group('Trezor size gate');
+    group('When a message is too long for a Trezor');
     reset();
     type('x'.repeat(80));
-    ok('exactly 80 bytes is allowed', !$('pickTrezor').classList.contains('is-disabled'));
+    ok('A message of exactly 80 bytes is still allowed', !$('pickTrezor').classList.contains('is-disabled'));
     type('x'.repeat(81));
-    ok('81 bytes disables the card', $('pickTrezor').classList.contains('is-disabled'));
-    is('and marks it for assistive tech', $('pickTrezor').getAttribute('aria-disabled'), 'true');
-    ok('steps are hidden', $('trezorSteps').hidden);
-    ok('a way out is offered', !$('trezorBlocked').hidden);
+    ok('One byte over that, the Trezor option switches itself off', $('pickTrezor').classList.contains('is-disabled'));
+    is('and screen readers are told it is unavailable', $('pickTrezor').getAttribute('aria-disabled'), 'true');
+    ok('The Trezor instructions are taken away', $('trezorSteps').hidden);
+    ok('and you are pointed at Bitcoin Core instead', !$('trezorBlocked').hidden);
     $('pickCore').click();
     $('pickTrezor').click();
-    is('the disabled card ignores clicks', $('pickTrezor').getAttribute('aria-pressed'), 'false');
+    is('Clicking the switched-off option does nothing', $('pickTrezor').getAttribute('aria-pressed'), 'false');
     type('short');
-    ok('going back under restores it', !$('pickTrezor').classList.contains('is-disabled'));
+    ok('Shortening the message brings the Trezor option back', !$('pickTrezor').classList.contains('is-disabled'));
     reset(); mode('hex'); type(HASH);
-    ok('a 32-byte hash keeps Trezor available', !$('pickTrezor').classList.contains('is-disabled'));
+    ok('A short fingerprint still works with a Trezor', !$('pickTrezor').classList.contains('is-disabled'));
 
-    group('Commands');
+    group('The commands you copy');
     reset(); mode('hex'); type('deadbeef');
-    ok('console form has no bitcoin-cli prefix', cmd().indexOf('bitcoin-cli') === -1);
+    ok('The version for the Bitcoin Core window suits that window', cmd().indexOf('bitcoin-cli') === -1);
     $('modeTerminal').click();
-    ok('terminal form adds bitcoin-cli', cmd().indexOf('bitcoin-cli') === 0);
-    ok('terminal form quotes the JSON', cmd().indexOf("'[]'") > -1);
+    ok('The version for a terminal suits a terminal', cmd().indexOf('bitcoin-cli') === 0);
+    ok('and is punctuated the way a terminal needs', cmd().indexOf("'[]'") > -1);
     $('modeConsole').click();
-    ok('payload appears beside the command', $('payloadBytes').textContent === '4 bytes');
+    ok('The size is shown next to the command, not only at the top', $('payloadBytes').textContent === '4 bytes');
 
-    group('Promises the README makes');
-    is('light is the default theme', win.getComputedStyle(doc.body).backgroundColor, 'rgb(242, 236, 224)');
-    is('the page makes no network requests', win.performance.getEntriesByType('resource').length, 0);
-    ok('no em dashes in the copy', !/[–—]/.test(doc.body.innerText));
+    group('Promises this site makes to you');
+    is('The page opens light, whatever your computer prefers', win.getComputedStyle(doc.body).backgroundColor, 'rgb(242, 236, 224)');
+    is('The page contacts no other computer, so nothing you type leaves it', win.performance.getEntriesByType('resource').length, 0);
+    ok('No em dashes anywhere in the writing', !/[–—]/.test(doc.body.innerText));
     reset();
   }
 
