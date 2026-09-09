@@ -474,6 +474,12 @@
     overflow-wrap: anywhere;
     user-select: all;
   }
+  .howto-lead {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    max-width: 66ch;
+    margin-bottom: 0.85rem;
+  }
   .howto p {
     margin-top: 0.6rem;
     font-size: 0.9rem;
@@ -1042,7 +1048,8 @@
     </div>
 
     <div class="howto">
-      <span class="howto-label">Making a hash of a file</span>
+      <span class="howto-label">Proof it existed: how to make the hash</span>
+      <p class="howto-lead">A hash is a short fingerprint of a file. Publishing the fingerprint instead of the file proves you had that exact file on that date, while revealing nothing about what is in it. Anyone can run the same command on their copy years later and see whether it still matches.</p>
       <code>shasum -a 256 yourfile</code>
       <p>That works on macOS and Linux. On Windows it is <code>certutil -hashfile yourfile SHA256</code>. Either way it prints 64 characters. Paste those into the Hex tab at the top and you are publishing the fingerprint of the file, not the file itself.</p>
     </div>
