@@ -1,6 +1,6 @@
 # OP_RETURN Message Builder
 
-**[→ Open the live tool](https://seqrets.github.io/op_return/)**
+**[→ Open the live tool](https://seqrets.github.io/op_return/)** &nbsp;·&nbsp; **[↓ Download it](https://seqrets.github.io/op_return/index.html)** (saves as `op_return.html`, works offline)
 
 A single-page tool for writing a permanent message to the Bitcoin blockchain. Type your text, watch it encode to hex as you go, then follow step-by-step instructions for either a Trezor hardware wallet or your own Bitcoin Core node.
 
@@ -11,6 +11,7 @@ One HTML file. No dependencies, no build step, no analytics, no network requests
 ## What it does
 
 - **Live hex encoding.** Your text converted to the hex that OP_RETURN actually carries, updating as you type.
+- **Hex input mode.** Paste raw hex instead of text, for anchoring a file hash or any payload that is not readable text. Spacing, newlines, a `0x` prefix and either case are all accepted.
 - **Byte meter.** A running count against the 80-byte limit, with a warning when you cross it. Accented letters and emoji cost several bytes each, so this is not a character count: a plain emoji costs 4 bytes, one with a skin tone costs 8.
 - **A guided flow.** Type a message, press Next, pick your wallet, follow the steps. The next action is always on screen.
 - **Two paths.** Trezor Suite, about five clicks and no command line, or Bitcoin Core, four commands on your own node.
@@ -42,6 +43,8 @@ An OP_RETURN output attaches a small piece of data to a Bitcoin transaction. Onc
 | **Policy** | Assume one message per transaction, since that is the rule older nodes enforce and therefore what travels reliably. Bitcoin Core v30 and newer allow several in a single transaction, but older nodes may not pass those on. You pay the ordinary miner fee for the bytes either way. |
 
 ## Running it locally
+
+Grab it straight from the footer of the live page, which saves it as `op_return.html` and runs offline with no further setup. Or clone it.
 
 No server required, it is a static file:
 

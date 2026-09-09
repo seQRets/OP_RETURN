@@ -184,6 +184,43 @@
   }
   .console-body { padding: 1.4rem 1.4rem 1.5rem; }
 
+  .field-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .field-head .field-label { margin-bottom: 0; }
+  .inmode {
+    display: inline-flex;
+    gap: 0.2rem;
+    padding: 0.2rem;
+    background: var(--panel-sunk);
+    border: 1px solid var(--line);
+    border-radius: 100px;
+  }
+  .inmode-btn {
+    font-family: var(--sans);
+    font-size: 0.76rem;
+    font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    border: none;
+    border-radius: 100px;
+    background: transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .inmode-btn:hover { color: var(--ink); }
+  .inmode-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .inmode-btn[aria-pressed="true"] {
+    background: var(--panel);
+    color: var(--ink);
+    box-shadow: var(--shadow);
+  }
+  .hexbox.bad { color: var(--danger); font-style: normal; }
+
   .field-label {
     display: block;
     font-size: 0.95rem;
@@ -702,7 +739,13 @@
   <section class="console" aria-label="Message encoder">
     <div class="console-bar">Encoder</div>
     <div class="console-body">
-      <label class="field-label" for="msg">Your message</label>
+      <div class="field-head">
+        <label class="field-label" for="msg">Your message</label>
+        <div class="inmode" role="group" aria-label="Input type">
+          <button class="inmode-btn" id="inText" type="button" aria-pressed="true">Text</button>
+          <button class="inmode-btn" id="inHex" type="button" aria-pressed="false">Hex</button>
+        </div>
+      </div>
       <textarea id="msg" placeholder="Type the message you want to write to the blockchain. Emoji work too 👍" spellcheck="false" autocomplete="off"></textarea>
 
       <div class="meter">
@@ -756,7 +799,7 @@
 
         <div class="step">
           <div class="step-title">Paste your message</div>
-          <p class="step-desc">Use the left box, the plain text one. Emoji work fine, Suite converts them for you. The hex box on the right fills automatically, and it will match the hex encoding shown above. Copy your message from below.</p>
+          <p class="step-desc" id="trezorPaste">Use the left box, the plain text one. Emoji work fine, Suite converts them for you. The hex box on the right fills automatically, and it will match the hex encoding shown above. Copy your message from below.</p>
           <div class="msg-echo" id="msgEcho"><button class="copy" data-plain="msgEcho">copy</button><span class="cmd-text"><span class="empty">Your message appears as you type.</span></span></div>
         </div>
 
@@ -916,8 +959,22 @@
   var mode = 'console';
   var msgEcho = document.querySelector('#msgEcho .cmd-text');
   var nextBtn = document.getElementById('nextBtn');
+  var trezorPaste = document.getElementById('trezorPaste');
   var LIMIT = 80;
   var enc = new TextEncoder();
+  var inputMode = 'text';
+
+  var TEXT_PLACEHOLDER = 'Type the message you want to write to the blockchain. Emoji work too \uD83D\uDC4D';
+  var HEX_PLACEHOLDER  = 'Paste raw hex, for example the SHA-256 hash of a file you want to timestamp';
+  var TEXT_HINT = 'Your message in hex appears as you type. OP_RETURN data travels as hex, which is just your text written in base 16.';
+  var HEX_HINT  = 'Paste hex above and it is used exactly as given. Two characters make one byte.';
+  var TREZOR_TEXT = 'Use the left box, the plain text one. Emoji work fine, Suite converts them for you. The hex box on the right fills automatically, and it will match the hex encoding shown above. Copy your message from below.';
+  var TREZOR_HEX  = 'Use the right box, the hex one, and paste the hex from below into it. Suite decodes it into the left box for you, which will look like nonsense if your hex is not readable text. That is fine and expected for a hash.';
+
+  // Accept what people actually paste: spacing, newlines, a 0x prefix, any case.
+  function normalizeHex(raw) {
+    return raw.replace(/\s+/g, '').replace(/^0x/i, '').toLowerCase();
+  }
 
   function toHex(bytes) {
     var out = '';
@@ -928,43 +985,90 @@
   }
 
   function update() {
-    var text = msg.value;
-    var bytes = enc.encode(text);
-    var hex = toHex(bytes);
-    var n = bytes.length;
+    var raw = msg.value;
+    var hex = '';
+    var n = 0;
+    var problem = '';
 
-    byteCount.textContent = n + (n === 1 ? ' byte' : ' bytes');
-    byteCount.classList.toggle('over', n > LIMIT);
-
-    var pct = Math.min(100, (n / LIMIT) * 100);
-    barFill.style.width = pct + '%';
-    barFill.classList.toggle('over', n > LIMIT);
-
-    if (n === 0) {
-      byteNote.textContent = 'Up to 80 bytes works everywhere.';
-    } else if (n <= LIMIT) {
-      byteNote.textContent = (LIMIT - n) + ' of 80 bytes left.';
+    if (inputMode === 'hex') {
+      hex = normalizeHex(raw);
+      if (hex === '') {
+        n = 0;
+      } else if (!/^[0-9a-f]+$/.test(hex)) {
+        problem = 'Not hex. Only the digits 0-9 and the letters a-f.';
+      } else if (hex.length % 2 !== 0) {
+        problem = 'Odd number of characters. Every byte needs two.';
+      } else {
+        n = hex.length / 2;
+      }
+      if (problem) { hex = ''; n = 0; }
     } else {
-      byteNote.textContent = 'Too long for Trezor Suite. Sending this needs Bitcoin Core v30 or newer.';
+      var bytes = enc.encode(raw);
+      hex = toHex(bytes);
+      n = bytes.length;
     }
 
-    if (hex) {
+    if (problem) {
+      byteCount.textContent = 'invalid';
+      byteCount.classList.add('over');
+      byteNote.textContent = problem;
+      barFill.style.width = '0%';
+      barFill.classList.add('over');
+    } else {
+      byteCount.textContent = n + (n === 1 ? ' byte' : ' bytes');
+      byteCount.classList.toggle('over', n > LIMIT);
+
+      var pct = Math.min(100, (n / LIMIT) * 100);
+      barFill.style.width = pct + '%';
+      barFill.classList.toggle('over', n > LIMIT);
+
+      if (n === 0) {
+        byteNote.textContent = 'Up to 80 bytes works everywhere.';
+      } else if (n <= LIMIT) {
+        byteNote.textContent = (LIMIT - n) + ' of 80 bytes left.';
+      } else {
+        byteNote.textContent = 'Too long for Trezor Suite. Sending this needs Bitcoin Core v30 or newer.';
+      }
+    }
+
+    hexOut.classList.toggle('bad', !!problem);
+    if (problem) {
+      hexOut.textContent = problem;
+    } else if (hex) {
       hexOut.textContent = hex;
     } else {
-      hexOut.innerHTML = '<span class="empty">Your message in hex appears as you type. OP_RETURN data travels as hex, which is just your text written in base 16.</span>';
+      hexOut.innerHTML = '<span class="empty">' + (inputMode === 'hex' ? HEX_HINT : TEXT_HINT) + '</span>';
     }
 
     currentHex = hex;
     renderCommands();
 
-    nextBtn.classList.toggle('is-ready', text.trim().length > 0);
+    nextBtn.classList.toggle('is-ready', hex.length > 0);
 
-    if (text) {
-      msgEcho.textContent = text;
+    // In hex mode the thing to paste into Suite is the hex itself.
+    var echo = inputMode === 'hex' ? hex : raw;
+    if (echo) {
+      msgEcho.textContent = echo;
     } else {
       msgEcho.innerHTML = '<span class="empty">Your message appears as you type.</span>';
     }
   }
+
+  var inText = document.getElementById('inText');
+  var inHex = document.getElementById('inHex');
+
+  function selectInput(which) {
+    inputMode = which;
+    inText.setAttribute('aria-pressed', which === 'text' ? 'true' : 'false');
+    inHex.setAttribute('aria-pressed', which === 'hex' ? 'true' : 'false');
+    msg.placeholder = which === 'hex' ? HEX_PLACEHOLDER : TEXT_PLACEHOLDER;
+    msg.spellcheck = which === 'text';
+    trezorPaste.textContent = which === 'hex' ? TREZOR_HEX : TREZOR_TEXT;
+    update();
+  }
+
+  inText.addEventListener('click', function () { selectInput('text'); });
+  inHex.addEventListener('click', function () { selectInput('hex'); });
 
   msg.addEventListener('input', update);
   update();
