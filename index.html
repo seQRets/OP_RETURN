@@ -277,6 +277,38 @@
     font-style: italic;
   }
 
+  .next-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+  }
+  .nextbtn {
+    font-family: var(--sans);
+    font-size: 0.92rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.15rem;
+    border-radius: 100px;
+    border: 1.5px solid var(--line);
+    background: var(--panel-sunk);
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  .nextbtn:hover { border-color: var(--accent); color: var(--accent-ink); transform: translateY(-1px); }
+  .nextbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .nextbtn .arr { transition: transform .15s ease; }
+  .nextbtn:hover .arr { transform: translateX(2px); }
+  /* Once there is something to send, the button becomes the obvious next move. */
+  .nextbtn.is-ready {
+    background: var(--accent-ink);
+    border-color: var(--accent-ink);
+    color: var(--panel);
+  }
+  .nextbtn.is-ready:hover { color: var(--panel); }
+
   /* ---------- pre-send warning ---------- */
   .warnstrip {
     margin-top: 1.25rem;
@@ -672,6 +704,10 @@
         <label class="field-label">Hex encoding</label>
         <div class="hexbox" id="hexOut"><span class="empty">Your message in hex appears as you type. OP_RETURN data travels as hex, which is just your text written in base 16.</span></div>
       </div>
+
+      <div class="next-row">
+        <button class="nextbtn" id="nextBtn" type="button">Next: pick your path <span class="arr" aria-hidden="true">&rarr;</span></button>
+      </div>
     </div>
   </section>
 
@@ -864,6 +900,7 @@
   var currentHex = '';
   var mode = 'console';
   var msgEcho = document.querySelector('#msgEcho .cmd-text');
+  var nextBtn = document.getElementById('nextBtn');
   var LIMIT = 80;
   var enc = new TextEncoder();
 
@@ -905,6 +942,8 @@
     currentHex = hex;
     renderCommands();
 
+    nextBtn.classList.toggle('is-ready', text.trim().length > 0);
+
     if (text) {
       msgEcho.textContent = text;
     } else {
@@ -914,6 +953,10 @@
 
   msg.addEventListener('input', update);
   update();
+
+  nextBtn.addEventListener('click', function () {
+    document.getElementById('paths').scrollIntoView();
+  });
 
   var pickTrezor = document.getElementById('pickTrezor');
   var pickCore = document.getElementById('pickCore');
