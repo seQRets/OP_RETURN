@@ -447,7 +447,17 @@
   }
   .info-card p { color: var(--ink-soft); font-size: 0.92rem; }
 
+  .info-card a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: var(--line);
+  }
+  .info-card a:hover { color: var(--accent-ink); text-decoration-color: var(--accent); }
+  .info-card a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
   .howto {
+    scroll-margin-top: 1.5rem;
     margin-top: 1.1rem;
     background: var(--panel);
     border: 1px solid var(--line);
@@ -1023,7 +1033,7 @@
     <div class="card-grid">
       <div class="info-card">
         <h3>Proof it existed</h3>
-        <p>Publish the hash of a document, and you have proof that the exact file existed before that block was mined. Useful for manuscripts, designs, research data, and disclosures, without revealing the contents.</p>
+        <p>Publish the hash of a document (<a href="#make-hash">instructions below</a>), and you have proof that the exact file existed before that block was mined. Useful for manuscripts, designs, research data, and disclosures, without revealing the contents.</p>
       </div>
       <div class="info-card">
         <h3>Notarization</h3>
@@ -1047,7 +1057,7 @@
       </div>
     </div>
 
-    <div class="howto">
+    <div class="howto" id="make-hash">
       <span class="howto-label">Proof it existed: how to make the hash</span>
       <p class="howto-lead">A hash is a short fingerprint of a file. Publishing the fingerprint instead of the file proves you had that exact file on that date, while revealing nothing about what is in it. Anyone can run the same command on their copy years later and see whether it still matches.</p>
       <code>shasum -a 256 yourfile</code>
